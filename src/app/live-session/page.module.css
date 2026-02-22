@@ -1,0 +1,58 @@
+.decisionPanelShell {
+  position: relative;
+  min-width: 0;
+}
+
+.listMessage,
+.listMessageError {
+  border: 1px solid var(--wf-border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-5);
+  background: var(--wf-surface);
+  font-size: 0.88rem;
+}
+
+.listMessage {
+  color: var(--wf-ink-2);
+}
+
+.listMessageError {
+  color: var(--wf-ink-2);
+  background: var(--wf-primary-faint);
+}
+
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 16px;
+  transform: translateX(-50%);
+  cursor: col-resize;
+  z-index: 3;
+  touch-action: none;
+}
+
+.resizeHandle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 72px;
+  border-radius: 999px;
+  background: var(--wf-border-strong);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity var(--duration-fast) ease;
+}
+
+.decisionPanelShell:hover .resizeHandle::before,
+.resizeHandle:focus-visible::before,
+.resizeHandleActive::before {
+  opacity: 1;
+}
+
+.resizeHandle:focus-visible {
+  outline: none;
+}

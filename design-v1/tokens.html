@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design Tokens — Workfully Kanban</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* ── Brand ── */
+      --wf-primary: #7C5CFC;
+      --wf-primary-hover: #6A4AE8;
+      --wf-primary-dark: #5A3DD6;
+      --wf-primary-light: rgba(124, 92, 252, 0.10);
+      --wf-primary-surface: #F3F0FF;
+      --wf-ink: #2D1B69;
+      --wf-ink-2: #6B6085;
+      --wf-accent: #F99D77;
+
+      /* ── Surfaces ── */
+      --wf-bg: #F6F4FB;
+      --wf-surface: #ffffff;
+      --wf-surface-soft: #FAF9FF;
+      --wf-border: #E4DFF2;
+      --wf-border-strong: #C8BFE0;
+
+      /* ── Semantic ── */
+      --wf-success: #1d8f73;
+      --wf-success-light: rgba(29, 143, 115, 0.10);
+      --wf-danger: #d1515f;
+      --wf-danger-light: rgba(209, 81, 95, 0.10);
+      --wf-warning: #d4930d;
+      --wf-warning-light: rgba(212, 147, 13, 0.10);
+
+      /* ── Typography ── */
+      --font-body: 'Kumbh Sans', system-ui, sans-serif;
+      --font-display: 'Newsreader', Georgia, serif;
+
+      /* ── Radii ── */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-pill: 999px;
+
+      /* ── Shadows ── */
+      --shadow-xs: 0 1px 2px rgba(45, 27, 105, 0.06);
+      --shadow-sm: 0 2px 8px rgba(45, 27, 105, 0.08);
+      --shadow-md: 0 8px 24px rgba(45, 27, 105, 0.10);
+      --shadow-lg: 0 20px 48px rgba(45, 27, 105, 0.12);
+
+      /* ── Spacing ── */
+      --sp-1: 0.25rem;
+      --sp-2: 0.5rem;
+      --sp-3: 0.75rem;
+      --sp-4: 1rem;
+      --sp-5: 1.25rem;
+      --sp-6: 1.5rem;
+      --sp-8: 2rem;
+
+      /* ── Transitions ── */
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --duration-fast: 150ms;
+      --duration-normal: 250ms;
+    }
+
+    * { box-sizing: border-box; margin: 0; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--wf-ink);
+      background: var(--wf-bg);
+      padding: 2rem;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      color: #1a0e40;
+    }
+
+    h2 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--wf-ink-2);
+      margin: 2rem 0 0.75rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+
+    .swatch {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--wf-border);
+      background: var(--wf-surface);
+      overflow: hidden;
+    }
+
+    .swatch-color {
+      height: 64px;
+    }
+
+    .swatch-info {
+      padding: 0.6rem 0.75rem;
+    }
+
+    .swatch-info p:first-child {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: #1a0e40;
+    }
+
+    .swatch-info p:last-child {
+      font-size: 0.72rem;
+      color: var(--wf-ink-2);
+      margin-top: 0.15rem;
+    }
+
+    .type-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .type-sample {
+      background: var(--wf-surface);
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+    }
+
+    .type-sample .label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--wf-ink-2);
+      margin-bottom: 0.35rem;
+    }
+
+    .display-font { font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; color: #1a0e40; }
+    .body-font { font-family: var(--font-body); font-size: 1rem; color: var(--wf-ink); }
+    .small-font { font-family: var(--font-body); font-size: 0.82rem; color: var(--wf-ink-2); }
+    .label-font { font-family: var(--font-body); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--wf-ink-2); }
+
+    .radius-row {
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .radius-demo {
+      text-align: center;
+    }
+
+    .radius-box {
+      width: 56px;
+      height: 56px;
+      background: var(--wf-primary-light);
+      border: 2px solid var(--wf-primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .radius-demo span {
+      font-size: 0.68rem;
+      color: var(--wf-ink-2);
+    }
+  </style>
+</head>
+<body>
+  <h1>Design Tokens</h1>
+
+  <h2>Brand Colors</h2>
+  <div class="grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #7C5CFC;"></div>
+      <div class="swatch-info"><p>Primary</p><p>#7C5CFC</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #6A4AE8;"></div>
+      <div class="swatch-info"><p>Primary Hover</p><p>#6A4AE8</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #5A3DD6;"></div>
+      <div class="swatch-info"><p>Primary Dark</p><p>#5A3DD6</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #2D1B69;"></div>
+      <div class="swatch-info"><p>Ink (text)</p><p>#2D1B69</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #6B6085;"></div>
+      <div class="swatch-info"><p>Ink Secondary</p><p>#6B6085</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #F3F0FF;"></div>
+      <div class="swatch-info"><p>Primary Surface</p><p>#F3F0FF</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #f99d77;"></div>
+      <div class="swatch-info"><p>Accent</p><p>#F99D77</p></div>
+    </div>
+  </div>
+
+  <h2>Semantic Colors</h2>
+  <div class="grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #1d8f73;"></div>
+      <div class="swatch-info"><p>Success</p><p>#1D8F73</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #d1515f;"></div>
+      <div class="swatch-info"><p>Danger</p><p>#D1515F</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #d4930d;"></div>
+      <div class="swatch-info"><p>Warning</p><p>#D4930D</p></div>
+    </div>
+  </div>
+
+  <h2>Surfaces</h2>
+  <div class="grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #F6F4FB; border-bottom: 1px solid #E4DFF2;"></div>
+      <div class="swatch-info"><p>Background</p><p>#F6F4FB</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #ffffff; border-bottom: 1px solid #E4DFF2;"></div>
+      <div class="swatch-info"><p>Surface</p><p>#FFFFFF</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #FAF9FF; border-bottom: 1px solid #E4DFF2;"></div>
+      <div class="swatch-info"><p>Surface Soft</p><p>#FAF9FF</p></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #E4DFF2;"></div>
+      <div class="swatch-info"><p>Border</p><p>#E4DFF2</p></div>
+    </div>
+  </div>
+
+  <h2>Typography</h2>
+  <div class="type-row">
+    <div class="type-sample">
+      <p class="label">Display — Newsreader 700</p>
+      <p class="display-font">Candidate Manager Kanban</p>
+    </div>
+    <div class="type-sample">
+      <p class="label">Body — Kumbh Sans 400</p>
+      <p class="body-font">Alice Johnson is a Frontend Engineer based in Lisbon with a strong portfolio.</p>
+    </div>
+    <div class="type-sample">
+      <p class="label">Secondary — Kumbh Sans 400</p>
+      <p class="small-font">Updated 2 hours ago · Score 92</p>
+    </div>
+    <div class="type-sample">
+      <p class="label">Label — Kumbh Sans 600 Uppercase</p>
+      <p class="label-font">Status Filter</p>
+    </div>
+  </div>
+
+  <h2>Border Radius</h2>
+  <div class="radius-row">
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius: 8px;"></div>
+      <span>8px sm</span>
+    </div>
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius: 12px;"></div>
+      <span>12px md</span>
+    </div>
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius: 16px;"></div>
+      <span>16px lg</span>
+    </div>
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius: 20px;"></div>
+      <span>20px xl</span>
+    </div>
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius: 999px;"></div>
+      <span>pill</span>
+    </div>
+  </div>
+</body>
+</html>

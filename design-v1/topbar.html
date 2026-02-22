@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Component — Topbar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --wf-primary: #7C5CFC;
+      --wf-primary-hover: #6A4AE8;
+      --wf-ink: #2D1B69;
+      --wf-ink-2: #6B6085;
+      --wf-bg: #F6F4FB;
+      --wf-surface: #ffffff;
+      --wf-surface-soft: #FAF9FF;
+      --wf-border: #E4DFF2;
+      --wf-accent: #f99d77;
+      --font-body: 'Kumbh Sans', system-ui, sans-serif;
+      --font-display: 'Newsreader', Georgia, serif;
+      --radius-xl: 20px;
+      --radius-pill: 999px;
+      --shadow-sm: 0 2px 8px rgba(45, 27, 105, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--wf-ink);
+      background: var(--wf-bg);
+      padding: 2rem;
+    }
+
+    .component-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--wf-ink-2);
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Topbar Component ── */
+    .topbar {
+      background: linear-gradient(125deg, #ffffff 0%, #FAF9FF 70%, #F3F0FF 100%);
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-xl);
+      padding: 0.9rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.92rem;
+      background: linear-gradient(148deg, var(--wf-primary), #5A3DD6);
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      line-height: 1.1;
+      color: #1a0e40;
+    }
+
+    .brand-text p {
+      font-size: 0.78rem;
+      color: var(--wf-ink-2);
+      margin-top: 0.1rem;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .topbar-search {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--wf-surface);
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-pill);
+      padding: 0.48rem 0.85rem;
+      font-size: 0.8rem;
+      color: var(--wf-ink-2);
+      min-width: 200px;
+    }
+
+    .topbar-search svg {
+      flex-shrink: 0;
+      opacity: 0.5;
+    }
+
+    .btn-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--wf-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 0.52rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .btn-add:hover {
+      background: var(--wf-primary-hover);
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--wf-accent), #e87c55);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.72rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.85rem;
+        border-radius: 16px;
+      }
+      .topbar-right {
+        width: 100%;
+      }
+      .topbar-search {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <p class="component-label">Component: Topbar</p>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="brand-mark" aria-hidden="true">W</div>
+      <div class="brand-text">
+        <h1>Candidate Manager</h1>
+        <p>Hiring Pipeline — 9 candidates</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Search candidates…</span>
+      </div>
+      <button class="btn-add" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Candidate
+      </button>
+      <div class="avatar" title="Recruiter">JD</div>
+    </div>
+  </header>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Component — Kanban Lane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --wf-primary: #7C5CFC;
+      --wf-ink: #2D1B69;
+      --wf-ink-2: #6B6085;
+      --wf-bg: #F6F4FB;
+      --wf-surface: #ffffff;
+      --wf-surface-soft: #FAF9FF;
+      --wf-border: #E4DFF2;
+      --wf-success: #1d8f73;
+      --wf-danger: #d1515f;
+      --font-body: 'Kumbh Sans', system-ui, sans-serif;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-pill: 999px;
+      --shadow-xs: 0 1px 2px rgba(45, 27, 105, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--wf-ink);
+      background: var(--wf-bg);
+      padding: 2rem;
+    }
+
+    .component-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--wf-ink-2);
+      margin-bottom: 0.75rem;
+    }
+
+    .variant-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--wf-ink-2);
+      margin: 2rem 0 0.5rem;
+    }
+
+    .lanes-showcase {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+    }
+
+    /* ── Lane ── */
+    .lane {
+      background: var(--wf-surface-soft);
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      min-height: 420px;
+    }
+
+    .lane-header {
+      padding: 0.85rem 0.9rem 0.7rem;
+      border-bottom: 1px solid var(--wf-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .lane-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lane-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .lane.new .lane-dot        { background: var(--wf-primary); }
+    .lane.shortlisted .lane-dot { background: var(--wf-success); }
+    .lane.rejected .lane-dot    { background: var(--wf-danger); }
+
+    .lane-title {
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--wf-ink-2);
+    }
+
+    .lane-count {
+      padding: 0.22rem 0.55rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .lane.new .lane-count {
+      background: rgba(124, 92, 252, 0.12);
+      color: var(--wf-primary);
+    }
+
+    .lane.shortlisted .lane-count {
+      background: rgba(29, 143, 115, 0.12);
+      color: var(--wf-success);
+    }
+
+    .lane.rejected .lane-count {
+      background: rgba(209, 81, 95, 0.12);
+      color: var(--wf-danger);
+    }
+
+    .lane-body {
+      padding: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      flex: 1;
+    }
+
+    /* Drop target state */
+    .lane.drop-target {
+      background: rgba(124, 92, 252, 0.04);
+      border-color: var(--wf-primary);
+      border-style: dashed;
+    }
+
+    .lane.drop-target .drop-hint {
+      display: block;
+    }
+
+    .drop-hint {
+      display: none;
+      text-align: center;
+      padding: 1.5rem 0;
+      font-size: 0.78rem;
+      color: var(--wf-primary);
+      font-weight: 600;
+    }
+
+    /* Locked lane indicator */
+    .lane-lock {
+      display: none;
+      font-size: 0.65rem;
+      color: var(--wf-ink-2);
+      padding: 0.15rem 0.5rem;
+      background: rgba(107, 96, 133, 0.08);
+      border-radius: var(--radius-pill);
+    }
+
+    .lane.shortlisted .lane-lock,
+    .lane.rejected .lane-lock {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* ── Card (inline) ── */
+    .card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--wf-border);
+      background: var(--wf-surface);
+      padding: 0.75rem;
+      box-shadow: var(--shadow-xs);
+      cursor: pointer;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .card:hover {
+      border-color: var(--wf-primary);
+    }
+
+    .card.selected {
+      border-color: var(--wf-primary);
+      box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.18);
+    }
+
+    .lane.shortlisted .card { border-left: 3px solid var(--wf-success); }
+    .lane.rejected .card    { border-left: 3px solid var(--wf-danger); opacity: 0.72; }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .card-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .card-avatar.purple { background: linear-gradient(135deg, #7C5CFC, #5A3DD6); }
+    .card-avatar.green  { background: linear-gradient(135deg, #1d8f73, #167a62); }
+    .card-avatar.orange { background: linear-gradient(135deg, #f99d77, #e87c55); }
+    .card-avatar.red    { background: linear-gradient(135deg, #d1515f, #b8404d); }
+
+    .card-name { font-size: 0.88rem; font-weight: 600; color: #1a0e40; }
+    .card-role { font-size: 0.74rem; color: var(--wf-ink-2); margin-top: 0.1rem; }
+
+    .card-footer {
+      margin-top: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      border-radius: var(--radius-pill);
+      padding: 0.18rem 0.48rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+    }
+
+    .chip.new        { background: rgba(124, 92, 252, 0.12); color: var(--wf-primary); }
+    .chip.shortlisted { background: rgba(29, 143, 115, 0.12); color: var(--wf-success); }
+    .chip.rejected   { background: rgba(209, 81, 95, 0.12); color: var(--wf-danger); }
+
+    .chip-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .card-time { font-size: 0.68rem; color: var(--wf-ink-2); }
+
+    /* Empty state */
+    .lane-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    .lane-empty p {
+      font-size: 0.8rem;
+      color: var(--wf-ink-2);
+    }
+  </style>
+</head>
+<body>
+  <p class="component-label">Component: Kanban Lanes — All Variants</p>
+
+  <div class="lanes-showcase">
+    <!-- NEW lane -->
+    <article class="lane new">
+      <div class="lane-header">
+        <div class="lane-title-group">
+          <span class="lane-dot"></span>
+          <span class="lane-title">New</span>
+        </div>
+        <span class="lane-count">4</span>
+      </div>
+      <div class="lane-body">
+        <article class="card selected">
+          <div class="card-top">
+            <div>
+              <p class="card-name">Alice Johnson</p>
+              <p class="card-role">Frontend Engineer · Lisbon</p>
+            </div>
+            <div class="card-avatar purple">AJ</div>
+          </div>
+          <div class="card-footer">
+            <span class="chip new"><span class="chip-dot"></span> NEW</span>
+            <span class="card-time">2h ago</span>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <div>
+              <p class="card-name">Mateo Torres</p>
+              <p class="card-role">Product Designer · Madrid</p>
+            </div>
+            <div class="card-avatar orange">MT</div>
+          </div>
+          <div class="card-footer">
+            <span class="chip new"><span class="chip-dot"></span> NEW</span>
+            <span class="card-time">45m ago</span>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <div>
+              <p class="card-name">Priya Nair</p>
+              <p class="card-role">Data Analyst · Berlin</p>
+            </div>
+            <div class="card-avatar orange">PN</div>
+          </div>
+          <div class="card-footer">
+            <span class="chip new"><span class="chip-dot"></span> NEW</span>
+            <span class="card-time">1d ago</span>
+          </div>
+        </article>
+      </div>
+    </article>
+
+    <!-- SHORTLISTED lane -->
+    <article class="lane shortlisted">
+      <div class="lane-header">
+        <div class="lane-title-group">
+          <span class="lane-dot"></span>
+          <span class="lane-title">Shortlisted</span>
+          <span class="lane-lock">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Final
+          </span>
+        </div>
+        <span class="lane-count">3</span>
+      </div>
+      <div class="lane-body">
+        <article class="card">
+          <div class="card-top">
+            <div>
+              <p class="card-name">Noah Bennett</p>
+              <p class="card-role">Engineering Manager · London</p>
+            </div>
+            <div class="card-avatar green">NB</div>
+          </div>
+          <div class="card-footer">
+            <span class="chip shortlisted"><span class="chip-dot"></span> SHORTLISTED</span>
+            <span class="card-time">3h ago</span>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <div>
+              <p class="card-name">Sofia Moretti</p>
+              <p class="card-role">QA Lead · Milan</p>
+            </div>
+            <div class="card-avatar green">SM</div>
+          </div>
+          <div class="card-footer">
+            <span class="chip shortlisted"><span class="chip-dot"></span> SHORTLISTED</span>
+            <span class="card-time">5h ago</span>
+          </div>
+        </article>
+      </div>
+    </article>
+
+    <!-- REJECTED lane -->
+    <article class="lane rejected">
+      <div class="lane-header">
+        <div class="lane-title-group">
+          <span class="lane-dot"></span>
+          <span class="lane-title">Rejected</span>
+          <span class="lane-lock">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Final
+          </span>
+        </div>
+        <span class="lane-count">2</span>
+      </div>
+      <div class="lane-body">
+        <article class="card">
+          <div class="card-top">
+            <div>
+              <p class="card-name">Lucas Meyer</p>
+              <p class="card-role">Backend Engineer · Amsterdam</p>
+            </div>
+            <div class="card-avatar red">LM</div>
+          </div>
+          <div class="card-footer">
+            <span class="chip rejected"><span class="chip-dot"></span> REJECTED</span>
+            <span class="card-time">1d ago</span>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <div>
+              <p class="card-name">Emily Ford</p>
+              <p class="card-role">People Ops · Manchester</p>
+            </div>
+            <div class="card-avatar red">EF</div>
+          </div>
+          <div class="card-footer">
+            <span class="chip rejected"><span class="chip-dot"></span> REJECTED</span>
+            <span class="card-time">2d ago</span>
+          </div>
+        </article>
+      </div>
+    </article>
+  </div>
+
+  <!-- Drop target variant -->
+  <p class="variant-label">Drop Target — when dragging a NEW card over Shortlisted</p>
+  <div style="max-width: 300px; margin-top: 0.5rem;">
+    <article class="lane shortlisted drop-target">
+      <div class="lane-header">
+        <div class="lane-title-group">
+          <span class="lane-dot"></span>
+          <span class="lane-title">Shortlisted</span>
+        </div>
+        <span class="lane-count">3</span>
+      </div>
+      <div class="lane-body">
+        <div class="drop-hint">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-bottom: 0.25rem;"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+          <br>Drop to shortlist
+        </div>
+      </div>
+    </article>
+  </div>
+</body>
+</html>

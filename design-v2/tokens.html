@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design Tokens — Purple Monochrome</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* Purple-only palette */
+      --wf-primary:        #7C5CFC;
+      --wf-primary-hover:  #6A4AE8;
+      --wf-primary-dark:   #5A3DD6;
+      --wf-primary-muted:  #A994FF;
+      --wf-primary-faint:  rgba(124,92,252,0.08);
+
+      /* Ink / text */
+      --wf-ink:            #1A0E40;
+      --wf-ink-2:          #6B6085;
+      --wf-ink-3:          #9890AD;
+
+      /* Surfaces */
+      --wf-bg:             #F6F4FB;
+      --wf-surface:        #FFFFFF;
+      --wf-surface-soft:   #FAF9FF;
+
+      /* Borders */
+      --wf-border:         #E4DFF2;
+      --wf-border-strong:  #C8BFE0;
+
+      /* Disabled */
+      --wf-disabled:       #D4CFE6;
+
+      /* Typography */
+      --font-body:    'Kumbh Sans', system-ui, sans-serif;
+      --font-display: 'Newsreader', Georgia, serif;
+
+      /* Border radius */
+      --radius-sm:   8px;
+      --radius-md:   12px;
+      --radius-lg:   16px;
+      --radius-xl:   20px;
+      --radius-pill: 999px;
+
+      /* Spacing */
+      --sp-1: 0.25rem;
+      --sp-2: 0.5rem;
+      --sp-3: 0.75rem;
+      --sp-4: 1rem;
+      --sp-5: 1.25rem;
+      --sp-6: 1.5rem;
+      --sp-8: 2rem;
+
+      /* Shadows */
+      --shadow-xs: 0 1px 2px rgba(26,14,64,0.06);
+      --shadow-sm: 0 2px 8px rgba(26,14,64,0.08);
+      --shadow-md: 0 8px 24px rgba(26,14,64,0.10);
+      --shadow-lg: 0 20px 48px rgba(26,14,64,0.15);
+
+      /* Animation */
+      --ease-out:         cubic-bezier(0.22, 1, 0.36, 1);
+      --duration-fast:    150ms;
+      --duration-normal:  250ms;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--wf-bg);
+      color: var(--wf-ink);
+      padding: var(--sp-8);
+      line-height: 1.5;
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--wf-ink);
+      margin-bottom: var(--sp-2);
+    }
+
+    .page-subtitle {
+      color: var(--wf-ink-2);
+      font-size: 0.95rem;
+      margin-bottom: var(--sp-8);
+    }
+
+    /* Section */
+    .section { margin-bottom: 3rem; }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--wf-ink);
+      margin-bottom: var(--sp-4);
+      padding-bottom: var(--sp-2);
+      border-bottom: 2px solid var(--wf-border);
+    }
+
+    /* Color swatches */
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--sp-4);
+    }
+
+    .swatch {
+      background: var(--wf-surface);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
+      border: 1px solid var(--wf-border);
+    }
+
+    .swatch-color {
+      height: 80px;
+      display: flex;
+      align-items: flex-end;
+      padding: var(--sp-2) var(--sp-3);
+    }
+
+    .swatch-color span {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      background: rgba(255,255,255,0.85);
+      color: var(--wf-ink);
+    }
+
+    .swatch-info {
+      padding: var(--sp-3);
+    }
+
+    .swatch-name {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--wf-ink);
+      margin-bottom: 2px;
+    }
+
+    .swatch-var {
+      font-size: 0.72rem;
+      color: var(--wf-ink-3);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* Typography */
+    .type-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--sp-6);
+      padding: var(--sp-4) 0;
+      border-bottom: 1px solid var(--wf-border);
+    }
+
+    .type-label {
+      min-width: 160px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--wf-ink-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .type-meta {
+      min-width: 180px;
+      font-size: 0.75rem;
+      color: var(--wf-ink-2);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* Radius */
+    .radius-grid {
+      display: flex;
+      gap: var(--sp-6);
+      flex-wrap: wrap;
+    }
+
+    .radius-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+
+    .radius-box {
+      width: 64px;
+      height: 64px;
+      background: var(--wf-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .radius-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--wf-ink-2);
+    }
+
+    .radius-val {
+      font-size: 0.68rem;
+      color: var(--wf-ink-3);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* Shadows */
+    .shadow-grid {
+      display: flex;
+      gap: var(--sp-6);
+      flex-wrap: wrap;
+    }
+
+    .shadow-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+
+    .shadow-box {
+      width: 100px;
+      height: 100px;
+      background: var(--wf-surface);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      color: var(--wf-ink-3);
+      font-weight: 600;
+    }
+
+    .shadow-label {
+      font-size: 0.72rem;
+      color: var(--wf-ink-2);
+      font-weight: 600;
+    }
+
+    /* Status chips */
+    .chip-row {
+      display: flex;
+      gap: var(--sp-4);
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .chip.new {
+      background: rgba(124,92,252,0.12);
+      color: var(--wf-primary);
+    }
+
+    .chip.shortlisted {
+      background: rgba(90,61,214,0.12);
+      color: var(--wf-primary-dark);
+    }
+
+    .chip.rejected {
+      background: rgba(152,144,173,0.12);
+      color: var(--wf-ink-3);
+    }
+
+    .chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .chip.new .chip-dot { background: var(--wf-primary); }
+    .chip.shortlisted .chip-dot { background: var(--wf-primary-dark); }
+    .chip.rejected .chip-dot { background: var(--wf-ink-3); }
+
+    /* Spacing tokens */
+    .spacing-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+
+    .spacing-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+    }
+
+    .spacing-bar {
+      height: 24px;
+      background: linear-gradient(135deg, var(--wf-primary), var(--wf-primary-muted));
+      border-radius: var(--radius-sm);
+    }
+
+    .spacing-info {
+      font-size: 0.75rem;
+      color: var(--wf-ink-2);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      min-width: 160px;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: var(--sp-4);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all var(--duration-fast) ease;
+    }
+
+    .btn-primary {
+      background: var(--wf-primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--wf-primary-hover);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      background: var(--wf-primary-faint);
+      color: var(--wf-primary);
+      border: 1px solid var(--wf-border);
+    }
+    .btn-secondary:hover {
+      background: rgba(124,92,252,0.12);
+      border-color: var(--wf-primary-muted);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--wf-ink-2);
+    }
+    .btn-ghost:hover {
+      background: var(--wf-primary-faint);
+      color: var(--wf-primary);
+    }
+
+    .btn-disabled {
+      background: var(--wf-disabled);
+      color: var(--wf-ink-3);
+      cursor: not-allowed;
+    }
+
+    /* Input */
+    .input-preview {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+      max-width: 360px;
+    }
+
+    .input-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--wf-ink);
+    }
+
+    .input {
+      padding: 10px 14px;
+      border: 1.5px solid var(--wf-border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--wf-ink);
+      background: var(--wf-surface);
+      outline: none;
+      transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+    }
+
+    .input:focus {
+      border-color: var(--wf-primary);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.12);
+    }
+
+    .input::placeholder {
+      color: var(--wf-ink-3);
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="page-title">Design Tokens</h1>
+  <p class="page-subtitle">Purple monochrome palette, typography, spacing, and UI primitives</p>
+
+  <!-- Colors -->
+  <section class="section">
+    <h2 class="section-title">Color Palette</h2>
+    <div class="swatch-grid">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#7C5CFC"><span>#7C5CFC</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Primary</div>
+          <div class="swatch-var">--wf-primary</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#6A4AE8"><span>#6A4AE8</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Primary Hover</div>
+          <div class="swatch-var">--wf-primary-hover</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#5A3DD6"><span>#5A3DD6</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Primary Dark</div>
+          <div class="swatch-var">--wf-primary-dark</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#A994FF"><span>#A994FF</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Primary Muted</div>
+          <div class="swatch-var">--wf-primary-muted</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:rgba(124,92,252,0.08); border: 1px dashed #C8BFE0"><span>8% alpha</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Primary Faint</div>
+          <div class="swatch-var">--wf-primary-faint</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1A0E40"><span style="color:#fff;background:rgba(0,0,0,0.3)">#1A0E40</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Ink (Primary Text)</div>
+          <div class="swatch-var">--wf-ink</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#6B6085"><span style="color:#fff;background:rgba(0,0,0,0.3)">#6B6085</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Ink 2 (Secondary)</div>
+          <div class="swatch-var">--wf-ink-2</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#9890AD"><span>#9890AD</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Ink 3 (Tertiary)</div>
+          <div class="swatch-var">--wf-ink-3</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#F6F4FB; border-bottom: 1px solid #E4DFF2"><span>#F6F4FB</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Background</div>
+          <div class="swatch-var">--wf-bg</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#FFFFFF; border-bottom: 1px solid #E4DFF2"><span>#FFFFFF</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Surface</div>
+          <div class="swatch-var">--wf-surface</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#FAF9FF; border-bottom: 1px solid #E4DFF2"><span>#FAF9FF</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Surface Soft</div>
+          <div class="swatch-var">--wf-surface-soft</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#E4DFF2"><span>#E4DFF2</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Border</div>
+          <div class="swatch-var">--wf-border</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#C8BFE0"><span>#C8BFE0</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Border Strong</div>
+          <div class="swatch-var">--wf-border-strong</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#D4CFE6"><span>#D4CFE6</span></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Disabled</div>
+          <div class="swatch-var">--wf-disabled</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Status chips -->
+  <section class="section">
+    <h2 class="section-title">Status Chips</h2>
+    <p style="color:var(--wf-ink-2); font-size:0.88rem; margin-bottom:var(--sp-4)">
+      No semantic colors (green/red/orange). Status differentiation via purple shade &amp; opacity.
+    </p>
+    <div class="chip-row">
+      <span class="chip new"><span class="chip-dot"></span> New</span>
+      <span class="chip shortlisted"><span class="chip-dot"></span> Shortlisted</span>
+      <span class="chip rejected"><span class="chip-dot"></span> Rejected</span>
+    </div>
+  </section>
+
+  <!-- Typography -->
+  <section class="section">
+    <h2 class="section-title">Typography</h2>
+    <div class="type-row">
+      <div class="type-label">Display / H1</div>
+      <div class="type-meta">Newsreader 700 / 2rem</div>
+      <div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--wf-ink)">Candidate Manager</div>
+    </div>
+    <div class="type-row">
+      <div class="type-label">Heading / H2</div>
+      <div class="type-meta">Newsreader 600 / 1.35rem</div>
+      <div style="font-family:var(--font-display);font-size:1.35rem;font-weight:600;color:var(--wf-ink)">New Candidates</div>
+    </div>
+    <div class="type-row">
+      <div class="type-label">Subheading</div>
+      <div class="type-meta">Kumbh Sans 600 / 1rem</div>
+      <div style="font-family:var(--font-body);font-size:1rem;font-weight:600;color:var(--wf-ink)">Decision Panel</div>
+    </div>
+    <div class="type-row">
+      <div class="type-label">Body</div>
+      <div class="type-meta">Kumbh Sans 400 / 0.9rem</div>
+      <div style="font-family:var(--font-body);font-size:0.9rem;font-weight:400;color:var(--wf-ink)">Maria Santos applied for Senior Frontend Engineer and is awaiting review.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-label">Body Small</div>
+      <div class="type-meta">Kumbh Sans 500 / 0.82rem</div>
+      <div style="font-family:var(--font-body);font-size:0.82rem;font-weight:500;color:var(--wf-ink-2)">Added 2 hours ago</div>
+    </div>
+    <div class="type-row">
+      <div class="type-label">Caption / Label</div>
+      <div class="type-meta">Kumbh Sans 600 / 0.72rem</div>
+      <div style="font-family:var(--font-body);font-size:0.72rem;font-weight:600;color:var(--wf-ink-3);text-transform:uppercase;letter-spacing:0.06em">STATUS LABEL</div>
+    </div>
+  </section>
+
+  <!-- Border Radius -->
+  <section class="section">
+    <h2 class="section-title">Border Radius</h2>
+    <div class="radius-grid">
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-sm)"></div>
+        <div class="radius-label">Small</div>
+        <div class="radius-val">8px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-md)"></div>
+        <div class="radius-label">Medium</div>
+        <div class="radius-val">12px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-lg)"></div>
+        <div class="radius-label">Large</div>
+        <div class="radius-val">16px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-xl)"></div>
+        <div class="radius-label">Extra Large</div>
+        <div class="radius-val">20px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-pill)"></div>
+        <div class="radius-label">Pill</div>
+        <div class="radius-val">999px</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shadows -->
+  <section class="section">
+    <h2 class="section-title">Shadows</h2>
+    <div class="shadow-grid">
+      <div class="shadow-item">
+        <div class="shadow-box" style="box-shadow:var(--shadow-xs)">XS</div>
+        <div class="shadow-label">shadow-xs</div>
+      </div>
+      <div class="shadow-item">
+        <div class="shadow-box" style="box-shadow:var(--shadow-sm)">SM</div>
+        <div class="shadow-label">shadow-sm</div>
+      </div>
+      <div class="shadow-item">
+        <div class="shadow-box" style="box-shadow:var(--shadow-md)">MD</div>
+        <div class="shadow-label">shadow-md</div>
+      </div>
+      <div class="shadow-item">
+        <div class="shadow-box" style="box-shadow:var(--shadow-lg)">LG</div>
+        <div class="shadow-label">shadow-lg</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Spacing -->
+  <section class="section">
+    <h2 class="section-title">Spacing Scale</h2>
+    <div class="spacing-grid">
+      <div class="spacing-row">
+        <div class="spacing-info">--sp-1 &nbsp; 0.25rem (4px)</div>
+        <div class="spacing-bar" style="width:16px"></div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-info">--sp-2 &nbsp; 0.5rem (8px)</div>
+        <div class="spacing-bar" style="width:32px"></div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-info">--sp-3 &nbsp; 0.75rem (12px)</div>
+        <div class="spacing-bar" style="width:48px"></div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-info">--sp-4 &nbsp; 1rem (16px)</div>
+        <div class="spacing-bar" style="width:64px"></div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-info">--sp-5 &nbsp; 1.25rem (20px)</div>
+        <div class="spacing-bar" style="width:80px"></div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-info">--sp-6 &nbsp; 1.5rem (24px)</div>
+        <div class="spacing-bar" style="width:96px"></div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-info">--sp-8 &nbsp; 2rem (32px)</div>
+        <div class="spacing-bar" style="width:128px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="section">
+    <h2 class="section-title">Buttons</h2>
+    <div class="btn-row">
+      <button class="btn btn-primary">Primary Action</button>
+      <button class="btn btn-secondary">Secondary</button>
+      <button class="btn btn-ghost">Ghost</button>
+      <button class="btn btn-disabled" disabled>Disabled</button>
+    </div>
+  </section>
+
+  <!-- Inputs -->
+  <section class="section">
+    <h2 class="section-title">Inputs</h2>
+    <div class="input-preview">
+      <label class="input-label">Reason for decision</label>
+      <input class="input" type="text" placeholder="Enter a reason (min 10 characters)..." />
+    </div>
+  </section>
+
+</body>
+</html>

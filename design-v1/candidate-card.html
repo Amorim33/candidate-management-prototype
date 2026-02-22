@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Component — Candidate Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --wf-primary: #7C5CFC;
+      --wf-primary-hover: #6A4AE8;
+      --wf-ink: #2D1B69;
+      --wf-ink-2: #6B6085;
+      --wf-bg: #F6F4FB;
+      --wf-surface: #ffffff;
+      --wf-surface-soft: #FAF9FF;
+      --wf-border: #E4DFF2;
+      --wf-success: #1d8f73;
+      --wf-danger: #d1515f;
+      --font-body: 'Kumbh Sans', system-ui, sans-serif;
+      --radius-md: 12px;
+      --radius-pill: 999px;
+      --shadow-xs: 0 1px 2px rgba(45, 27, 105, 0.06);
+      --shadow-sm: 0 2px 8px rgba(45, 27, 105, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--wf-ink);
+      background: var(--wf-bg);
+      padding: 2rem;
+    }
+
+    .component-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--wf-ink-2);
+      margin-bottom: 0.75rem;
+    }
+
+    .variant-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--wf-ink-2);
+      margin: 1.5rem 0 0.5rem;
+      padding-left: 0.25rem;
+    }
+
+    .showcase {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── Candidate Card ── */
+    .card {
+      width: 280px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--wf-border);
+      background: var(--wf-surface);
+      padding: 0.85rem;
+      box-shadow: var(--shadow-xs);
+      cursor: pointer;
+      transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+    }
+
+    .card:hover {
+      border-color: var(--wf-primary);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    /* Selected state — primary ring */
+    .card.selected {
+      border-color: var(--wf-primary);
+      box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.18), var(--shadow-sm);
+    }
+
+    /* Shortlisted card — green accent */
+    .card.shortlisted {
+      border-left: 3px solid var(--wf-success);
+    }
+
+    /* Rejected card — red accent, dimmed */
+    .card.rejected {
+      border-left: 3px solid var(--wf-danger);
+      opacity: 0.7;
+    }
+
+    .card.rejected:hover {
+      opacity: 0.85;
+    }
+
+    /* Dragging ghost */
+    .card.dragging {
+      opacity: 0.5;
+      border: 2px dashed var(--wf-primary);
+      transform: rotate(2deg);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .card-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .card-avatar.purple { background: linear-gradient(135deg, #7C5CFC, #5A3DD6); }
+    .card-avatar.green  { background: linear-gradient(135deg, #1d8f73, #167a62); }
+    .card-avatar.orange { background: linear-gradient(135deg, #f99d77, #e87c55); }
+    .card-avatar.red    { background: linear-gradient(135deg, #d1515f, #b8404d); }
+
+    .card-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #1a0e40;
+    }
+
+    .card-role {
+      font-size: 0.78rem;
+      color: var(--wf-ink-2);
+      margin-top: 0.12rem;
+    }
+
+    .card-footer {
+      margin-top: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border-radius: var(--radius-pill);
+      padding: 0.2rem 0.55rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .chip.new {
+      background: rgba(124, 92, 252, 0.12);
+      color: var(--wf-primary);
+    }
+
+    .chip.shortlisted {
+      background: rgba(29, 143, 115, 0.12);
+      color: var(--wf-success);
+    }
+
+    .chip.rejected {
+      background: rgba(209, 81, 95, 0.12);
+      color: var(--wf-danger);
+    }
+
+    .chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .card-time {
+      font-size: 0.7rem;
+      color: var(--wf-ink-2);
+    }
+
+    /* ── Quick actions on hover ── */
+    .card-actions {
+      display: none;
+      gap: 0.35rem;
+      margin-top: 0.65rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--wf-border);
+    }
+
+    .card:hover .card-actions,
+    .card.selected .card-actions {
+      display: flex;
+    }
+
+    .card.shortlisted .card-actions,
+    .card.rejected .card-actions {
+      display: none !important;
+    }
+
+    .action-sm {
+      flex: 1;
+      border: none;
+      border-radius: 8px;
+      padding: 0.42rem 0;
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 150ms ease;
+    }
+
+    .action-sm:hover { opacity: 0.85; }
+
+    .action-sm.shortlist {
+      background: rgba(29, 143, 115, 0.12);
+      color: var(--wf-success);
+    }
+
+    .action-sm.reject {
+      background: rgba(209, 81, 95, 0.12);
+      color: var(--wf-danger);
+    }
+  </style>
+</head>
+<body>
+  <p class="component-label">Component: Candidate Card — All States</p>
+
+  <!-- Default / New -->
+  <p class="variant-label">Default (NEW) — idle</p>
+  <div class="showcase">
+    <article class="card">
+      <div class="card-top">
+        <div>
+          <p class="card-name">Alice Johnson</p>
+          <p class="card-role">Frontend Engineer · Lisbon</p>
+        </div>
+        <div class="card-avatar purple">AJ</div>
+      </div>
+      <div class="card-footer">
+        <span class="chip new"><span class="chip-dot"></span> NEW</span>
+        <span class="card-time">2h ago</span>
+      </div>
+      <div class="card-actions">
+        <button class="action-sm shortlist" type="button">Shortlist</button>
+        <button class="action-sm reject" type="button">Reject</button>
+      </div>
+    </article>
+  </div>
+
+  <!-- Selected -->
+  <p class="variant-label">Selected — active for decision</p>
+  <div class="showcase">
+    <article class="card selected">
+      <div class="card-top">
+        <div>
+          <p class="card-name">Mateo Torres</p>
+          <p class="card-role">Product Designer · Madrid</p>
+        </div>
+        <div class="card-avatar orange">MT</div>
+      </div>
+      <div class="card-footer">
+        <span class="chip new"><span class="chip-dot"></span> NEW</span>
+        <span class="card-time">45m ago</span>
+      </div>
+      <div class="card-actions">
+        <button class="action-sm shortlist" type="button">Shortlist</button>
+        <button class="action-sm reject" type="button">Reject</button>
+      </div>
+    </article>
+  </div>
+
+  <!-- Shortlisted (locked) -->
+  <p class="variant-label">Shortlisted — final, no further actions</p>
+  <div class="showcase">
+    <article class="card shortlisted">
+      <div class="card-top">
+        <div>
+          <p class="card-name">Noah Bennett</p>
+          <p class="card-role">Engineering Manager · London</p>
+        </div>
+        <div class="card-avatar green">NB</div>
+      </div>
+      <div class="card-footer">
+        <span class="chip shortlisted"><span class="chip-dot"></span> SHORTLISTED</span>
+        <span class="card-time">3h ago</span>
+      </div>
+      <div class="card-actions">
+        <!-- empty: no actions for shortlisted -->
+      </div>
+    </article>
+  </div>
+
+  <!-- Rejected (locked) -->
+  <p class="variant-label">Rejected — final, dimmed</p>
+  <div class="showcase">
+    <article class="card rejected">
+      <div class="card-top">
+        <div>
+          <p class="card-name">Lucas Meyer</p>
+          <p class="card-role">Backend Engineer · Amsterdam</p>
+        </div>
+        <div class="card-avatar red">LM</div>
+      </div>
+      <div class="card-footer">
+        <span class="chip rejected"><span class="chip-dot"></span> REJECTED</span>
+        <span class="card-time">1d ago</span>
+      </div>
+      <div class="card-actions">
+        <!-- empty: no actions for rejected -->
+      </div>
+    </article>
+  </div>
+
+  <!-- Dragging -->
+  <p class="variant-label">Dragging — ghost state</p>
+  <div class="showcase">
+    <article class="card dragging">
+      <div class="card-top">
+        <div>
+          <p class="card-name">Priya Nair</p>
+          <p class="card-role">Data Analyst · Berlin</p>
+        </div>
+        <div class="card-avatar orange">PN</div>
+      </div>
+      <div class="card-footer">
+        <span class="chip new"><span class="chip-dot"></span> NEW</span>
+        <span class="card-time">1d ago</span>
+      </div>
+    </article>
+  </div>
+</body>
+</html>

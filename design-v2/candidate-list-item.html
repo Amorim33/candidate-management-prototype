@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidate List Item — States</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --wf-primary:        #7C5CFC;
+      --wf-primary-hover:  #6A4AE8;
+      --wf-primary-dark:   #5A3DD6;
+      --wf-primary-muted:  #A994FF;
+      --wf-primary-faint:  rgba(124,92,252,0.08);
+      --wf-ink:            #1A0E40;
+      --wf-ink-2:          #6B6085;
+      --wf-ink-3:          #9890AD;
+      --wf-bg:             #F6F4FB;
+      --wf-surface:        #FFFFFF;
+      --wf-surface-soft:   #FAF9FF;
+      --wf-border:         #E4DFF2;
+      --wf-border-strong:  #C8BFE0;
+      --wf-disabled:       #D4CFE6;
+      --font-body:    'Kumbh Sans', system-ui, sans-serif;
+      --font-display: 'Newsreader', Georgia, serif;
+      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-pill: 999px;
+      --sp-1: 0.25rem; --sp-2: 0.5rem; --sp-3: 0.75rem; --sp-4: 1rem; --sp-5: 1.25rem; --sp-6: 1.5rem; --sp-8: 2rem;
+      --shadow-xs: 0 1px 2px rgba(26,14,64,0.06);
+      --shadow-sm: 0 2px 8px rgba(26,14,64,0.08);
+      --shadow-md: 0 8px 24px rgba(26,14,64,0.10);
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --duration-fast: 150ms;
+      --duration-normal: 250ms;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--wf-bg);
+      color: var(--wf-ink);
+      padding: var(--sp-8);
+      line-height: 1.5;
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--wf-ink);
+      margin-bottom: var(--sp-2);
+    }
+
+    .page-subtitle {
+      color: var(--wf-ink-2);
+      font-size: 0.88rem;
+      margin-bottom: var(--sp-8);
+    }
+
+    .state-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--wf-ink-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--sp-3);
+      margin-top: var(--sp-6);
+    }
+
+    .list-container {
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* Base list item */
+    .candidate-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      padding: var(--sp-4) var(--sp-5);
+      background: var(--wf-surface);
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--duration-fast) ease;
+      position: relative;
+    }
+
+    .candidate-row:hover {
+      border-color: var(--wf-border-strong);
+      box-shadow: var(--shadow-xs);
+    }
+
+    /* Selected state */
+    .candidate-row.selected {
+      border-color: var(--wf-primary);
+      background: var(--wf-primary-faint);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.10), var(--shadow-sm);
+    }
+
+    .candidate-row.selected::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: var(--wf-primary);
+    }
+
+    /* Read-only rows */
+    .candidate-row.read-only {
+      cursor: default;
+    }
+
+    .candidate-row.read-only:hover {
+      border-color: var(--wf-border);
+      box-shadow: none;
+    }
+
+    .candidate-row.dimmed {
+      opacity: 0.65;
+    }
+
+    .candidate-row.dimmed:hover {
+      opacity: 0.75;
+    }
+
+    /* Avatar */
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--wf-primary-muted), var(--wf-primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .candidate-row.dimmed .avatar {
+      background: linear-gradient(135deg, var(--wf-disabled), var(--wf-ink-3));
+    }
+
+    /* Info block */
+    .candidate-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .candidate-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--wf-ink);
+      margin-bottom: 2px;
+    }
+
+    .candidate-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      flex-wrap: wrap;
+    }
+
+    .candidate-role {
+      font-size: 0.8rem;
+      color: var(--wf-ink-2);
+    }
+
+    .meta-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--wf-border-strong);
+      flex-shrink: 0;
+    }
+
+    .candidate-location {
+      font-size: 0.78rem;
+      color: var(--wf-ink-3);
+    }
+
+    /* LinkedIn link */
+    .linkedin-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      color: var(--wf-primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color var(--duration-fast) ease;
+    }
+
+    .linkedin-link:hover {
+      color: var(--wf-primary-hover);
+      text-decoration: underline;
+    }
+
+    .linkedin-link svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Timestamp */
+    .candidate-time {
+      font-size: 0.72rem;
+      color: var(--wf-ink-3);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Status chips */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .chip.new {
+      background: rgba(124,92,252,0.12);
+      color: var(--wf-primary);
+    }
+
+    .chip.shortlisted {
+      background: rgba(90,61,214,0.12);
+      color: var(--wf-primary-dark);
+    }
+
+    .chip.rejected {
+      background: rgba(152,144,173,0.12);
+      color: var(--wf-ink-3);
+    }
+
+    .chip-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    .chip.new .chip-dot { background: var(--wf-primary); }
+    .chip.shortlisted .chip-dot { background: var(--wf-primary-dark); }
+    .chip.rejected .chip-dot { background: var(--wf-ink-3); }
+
+    /* Action buttons — visible on hover */
+    .candidate-actions {
+      display: flex;
+      gap: var(--sp-2);
+      opacity: 0;
+      transition: opacity var(--duration-fast) ease;
+      flex-shrink: 0;
+    }
+
+    .candidate-row:hover .candidate-actions {
+      opacity: 1;
+    }
+
+    .action-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid var(--wf-border);
+      cursor: pointer;
+      transition: all var(--duration-fast) ease;
+      background: var(--wf-surface);
+      color: var(--wf-ink-2);
+    }
+
+    .action-btn.shortlist {
+      background: var(--wf-primary-faint);
+      color: var(--wf-primary);
+      border-color: rgba(124,92,252,0.2);
+    }
+
+    .action-btn.shortlist:hover {
+      background: var(--wf-primary);
+      color: #fff;
+      border-color: var(--wf-primary);
+    }
+
+    .action-btn.reject:hover {
+      background: var(--wf-primary-faint);
+      color: var(--wf-ink);
+      border-color: var(--wf-border-strong);
+    }
+
+    /* Reason text for read-only rows */
+    .decision-reason {
+      font-size: 0.78rem;
+      color: var(--wf-ink-2);
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    /* Always-visible actions for demo */
+    .candidate-row.show-actions .candidate-actions {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="page-title">Candidate List Item</h1>
+  <p class="page-subtitle">All states: default, hover, selected, shortlisted (read-only), rejected (read-only)</p>
+
+  <!-- NEW — Default -->
+  <div class="state-label">New — Default (hover to see actions)</div>
+  <div class="list-container">
+    <article class="candidate-row">
+      <div class="avatar">MS</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Maria Santos</div>
+        <div class="candidate-meta">
+          <span class="candidate-role">Senior Frontend Engineer</span>
+          <span class="meta-dot"></span>
+          <span class="candidate-location">Lisbon, Portugal</span>
+          <span class="meta-dot"></span>
+          <a href="#" class="linkedin-link">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            linkedin.com/in/msantos
+          </a>
+        </div>
+      </div>
+      <span class="chip new"><span class="chip-dot"></span> New</span>
+      <span class="candidate-time">2h ago</span>
+      <div class="candidate-actions">
+        <button class="action-btn shortlist">Shortlist</button>
+        <button class="action-btn reject">Reject</button>
+      </div>
+    </article>
+  </div>
+
+  <!-- NEW — Actions always visible (for demo) -->
+  <div class="state-label">New — Hovered (actions revealed)</div>
+  <div class="list-container">
+    <article class="candidate-row show-actions" style="border-color:var(--wf-border-strong); box-shadow:var(--shadow-xs)">
+      <div class="avatar">JP</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Jo&atilde;o Pereira</div>
+        <div class="candidate-meta">
+          <span class="candidate-role">Backend Developer</span>
+          <span class="meta-dot"></span>
+          <span class="candidate-location">Porto, Portugal</span>
+          <span class="meta-dot"></span>
+          <a href="#" class="linkedin-link">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            linkedin.com/in/jpereira
+          </a>
+        </div>
+      </div>
+      <span class="chip new"><span class="chip-dot"></span> New</span>
+      <span class="candidate-time">5h ago</span>
+      <div class="candidate-actions">
+        <button class="action-btn shortlist">Shortlist</button>
+        <button class="action-btn reject">Reject</button>
+      </div>
+    </article>
+  </div>
+
+  <!-- NEW — Selected -->
+  <div class="state-label">New — Selected (detail panel open)</div>
+  <div class="list-container">
+    <article class="candidate-row selected show-actions">
+      <div class="avatar">AC</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Ana Costa</div>
+        <div class="candidate-meta">
+          <span class="candidate-role">Product Designer</span>
+          <span class="meta-dot"></span>
+          <span class="candidate-location">S&atilde;o Paulo, Brazil</span>
+          <span class="meta-dot"></span>
+          <a href="#" class="linkedin-link">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            linkedin.com/in/acosta
+          </a>
+        </div>
+      </div>
+      <span class="chip new"><span class="chip-dot"></span> New</span>
+      <span class="candidate-time">1d ago</span>
+      <div class="candidate-actions">
+        <button class="action-btn shortlist">Shortlist</button>
+        <button class="action-btn reject">Reject</button>
+      </div>
+    </article>
+  </div>
+
+  <!-- Shortlisted — read only -->
+  <div class="state-label">Shortlisted — Read Only</div>
+  <div class="list-container">
+    <article class="candidate-row read-only">
+      <div class="avatar">LF</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Lucas Ferreira</div>
+        <div class="candidate-meta">
+          <span class="candidate-role">DevOps Engineer</span>
+          <span class="meta-dot"></span>
+          <span class="candidate-location">Rio de Janeiro, Brazil</span>
+          <span class="meta-dot"></span>
+          <a href="#" class="linkedin-link">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            linkedin.com/in/lferreira
+          </a>
+        </div>
+        <div class="decision-reason">"Strong infrastructure background, great culture fit."</div>
+      </div>
+      <span class="chip shortlisted"><span class="chip-dot"></span> Shortlisted</span>
+      <span class="candidate-time">3d ago</span>
+    </article>
+  </div>
+
+  <!-- Rejected — read only, dimmed -->
+  <div class="state-label">Rejected — Read Only (dimmed)</div>
+  <div class="list-container">
+    <article class="candidate-row read-only dimmed">
+      <div class="avatar">RT</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Ricardo Torres</div>
+        <div class="candidate-meta">
+          <span class="candidate-role">QA Engineer</span>
+          <span class="meta-dot"></span>
+          <span class="candidate-location">Madrid, Spain</span>
+          <span class="meta-dot"></span>
+          <a href="#" class="linkedin-link">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            linkedin.com/in/rtorres
+          </a>
+        </div>
+        <div class="decision-reason">"Insufficient experience with automated testing frameworks."</div>
+      </div>
+      <span class="chip rejected"><span class="chip-dot"></span> Rejected</span>
+      <span class="candidate-time">5d ago</span>
+    </article>
+  </div>
+
+</body>
+</html>

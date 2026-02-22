@@ -1,0 +1,63 @@
+.header {
+  padding: var(--sp-6) var(--sp-8);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  border-bottom: 1px solid var(--wf-border);
+  background: var(--wf-surface);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--wf-ink);
+}
+
+.count {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.countNew {
+  color: var(--wf-primary);
+  background: var(--wf-primary-faint);
+}
+
+.countShortlisted {
+  color: var(--wf-primary-dark);
+  background: rgba(90,61,214,0.1);
+}
+
+.countRejected {
+  color: var(--wf-ink-3);
+  background: rgba(152,144,173,0.12);
+}
+
+.btnAdd {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  background: var(--wf-primary);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) ease;
+}
+
+.btnAdd:hover {
+  background: var(--wf-primary-hover);
+}
+
+.btnAdd svg {
+  width: 16px;
+  height: 16px;
+}

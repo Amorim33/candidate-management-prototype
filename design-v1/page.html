@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workfully — Candidate Manager Kanban</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <style>
+    /* ───────────────────────────────────────────────
+       DESIGN TOKENS  (Workfully purple palette)
+       ─────────────────────────────────────────────── */
+    :root {
+      --wf-primary: #7C5CFC;
+      --wf-primary-hover: #6A4AE8;
+      --wf-primary-dark: #5A3DD6;
+      --wf-primary-light: rgba(124, 92, 252, 0.10);
+      --wf-primary-surface: #F3F0FF;
+      --wf-ink: #2D1B69;
+      --wf-ink-2: #6B6085;
+      --wf-accent: #F99D77;
+
+      --wf-bg: #F6F4FB;
+      --wf-surface: #ffffff;
+      --wf-surface-soft: #FAF9FF;
+      --wf-border: #E4DFF2;
+      --wf-border-strong: #C8BFE0;
+
+      --wf-success: #1d8f73;
+      --wf-success-light: rgba(29, 143, 115, 0.10);
+      --wf-danger: #d1515f;
+      --wf-danger-light: rgba(209, 81, 95, 0.10);
+
+      --font-body: 'Kumbh Sans', system-ui, sans-serif;
+      --font-display: 'Newsreader', Georgia, serif;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-pill: 999px;
+
+      --shadow-xs: 0 1px 2px rgba(45, 27, 105, 0.06);
+      --shadow-sm: 0 2px 8px rgba(45, 27, 105, 0.08);
+      --shadow-md: 0 8px 24px rgba(45, 27, 105, 0.10);
+      --shadow-lg: 0 20px 48px rgba(45, 27, 105, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; }
+    html, body { min-height: 100%; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--wf-ink);
+      background:
+        radial-gradient(circle at 92% -20%, rgba(124, 92, 252, 0.15), transparent 50%),
+        radial-gradient(circle at 0% 110%, rgba(249, 157, 119, 0.12), transparent 45%),
+        var(--wf-bg);
+    }
+
+    /* ───────────────────────────────────────────────
+       LAYOUT SHELL
+       ─────────────────────────────────────────────── */
+    .app-shell {
+      width: min(1380px, calc(100vw - 2rem));
+      margin: 1.2rem auto 2rem;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    /* ───────────────────────────────────────────────
+       TOPBAR
+       ─────────────────────────────────────────────── */
+    .topbar {
+      background: linear-gradient(125deg, #ffffff 0%, #FAF9FF 70%, #F3F0FF 100%);
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-xl);
+      padding: 0.85rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      animation: slide-down 420ms ease-out;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.92rem;
+      background: linear-gradient(148deg, var(--wf-primary), var(--wf-primary-dark));
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.05rem, 1.6vw, 1.28rem);
+      line-height: 1.1;
+      color: #1a0e40;
+    }
+
+    .brand-text p {
+      font-size: 0.78rem;
+      color: var(--wf-ink-2);
+      margin-top: 0.08rem;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .topbar-search {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--wf-surface);
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-pill);
+      padding: 0.45rem 0.8rem;
+      font-size: 0.78rem;
+      color: var(--wf-ink-2);
+      min-width: 180px;
+    }
+
+    .topbar-search svg { flex-shrink: 0; opacity: 0.5; }
+
+    .btn-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--wf-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 0.48rem 0.95rem;
+      font-family: var(--font-body);
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .btn-add:hover { background: var(--wf-primary-hover); }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--wf-accent), #e87c55);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.72rem;
+      flex-shrink: 0;
+    }
+
+    /* ───────────────────────────────────────────────
+       STATS ROW
+       ─────────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      gap: 0.7rem;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .stat-card {
+      background: var(--wf-surface);
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-lg);
+      padding: 0.85rem 1rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      animation: fade-up 480ms ease both;
+    }
+
+    .stat-card:nth-child(2) { animation-delay: 60ms; }
+    .stat-card:nth-child(3) { animation-delay: 110ms; }
+    .stat-card:nth-child(4) { animation-delay: 160ms; }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .stat-card.total::before  { background: var(--wf-primary); }
+    .stat-card.new::before    { background: var(--wf-primary); opacity: 0.5; }
+    .stat-card.short::before  { background: var(--wf-success); }
+    .stat-card.reject::before { background: var(--wf-danger); }
+
+    .stat-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--wf-ink-2);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: #1a0e40;
+      margin-top: 0.25rem;
+      line-height: 1;
+    }
+
+    .stat-meta {
+      font-size: 0.68rem;
+      color: var(--wf-ink-2);
+      margin-top: 0.3rem;
+    }
+
+    /* ───────────────────────────────────────────────
+       WORKSPACE  (board + side panel)
+       ─────────────────────────────────────────────── */
+    .workspace {
+      display: grid;
+      gap: 0.85rem;
+      grid-template-columns: minmax(0, 1.85fr) minmax(340px, 1fr);
+    }
+
+    /* ───────────────────────────────────────────────
+       BOARD PANEL
+       ─────────────────────────────────────────────── */
+    .board-panel {
+      background: var(--wf-surface);
+      border: 1px solid var(--wf-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      padding: 0.9rem;
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .panel-headline h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+      color: #1a0e40;
+    }
+
+    .panel-headline p {
+      font-size: 0.82rem;
+      color: var(--wf-ink-2);
+      margin-top: 0.1rem;
+    }
+
+    /* ───────────────────────────────────────────────
+       KANBAN
+       ─────────────────────────────────────────────── */
+    .kanban {
+      display: grid;
+      gap: 0.65rem;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+    }
+
+    .lane {
+      background: var(--wf-surface-soft);
+      border: 1px solid var(--wf-border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      min-height: 440px;
+    }
+
+    .lane-header {
+      padding: 0.8rem 0.85rem 0.65rem;
+      border-bottom: 1px solid var(--wf-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .lane-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .lane-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .lane.new .lane-dot        { background: var(--wf-primary); }
+    .lane.shortlisted .lane-dot { background: var(--wf-success); }
+    .lane.rejected .lane-dot    { background: var(--wf-danger); }
+
+    .lane-title {
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--wf-ink-2);
+    }
+
+    .lane-lock {
+      display: none;
+      font-size: 0.62rem;
+      color: var(--wf-ink-2);
+      padding: 0.12rem 0.45rem;
+      background: rgba(107, 96, 133, 0.08);
+      border-radius: var(--radius-pill);
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .lane.shortlisted .lane-lock,
+    .lane.rejected .lane-lock { display: inline-flex; }
+
+    .lane-count {
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .lane.new .lane-count        { background: rgba(124, 92, 252, 0.12); color: var(--wf-primary); }
+    .lane.shortlisted .lane-count { background: rgba(29, 143, 115, 0.12); color: var(--wf-success); }
+    .lane.rejected .lane-count   { background: rgba(209, 81, 95, 0.12); color: var(--wf-danger); }
+
+    .lane-body {
+      padding: 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    /* ───────────────────────────────────────────────
+       CANDIDATE CARD
+       ─────────────────────────────────────────────── */
+    .card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--wf-border);
+      background: var(--wf-surface);
+      padding: 0.75rem;
+      box-shadow: var(--shadow-xs);
+      cursor: pointer;
+      transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+      animation: fade-up 360ms ease both;
+    }
+
+    .card:hover {
+      border-color: var(--wf-primary);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    .card.selected {
+      border-color: var(--wf-primary);
+      box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.18), var(--shadow-sm);
+    }
+
+    .lane.shortlisted .card { border-left: 3px solid var(--wf-success); }
+    .lane.rejected .card    { border-left: 3px solid var(--wf-danger); opacity: 0.72; }
+    .lane.rejected .card:hover { opacity: 0.85; }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    .card-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .card-avatar.purple { background: linear-gradient(135deg, #7C5CFC, #5A3DD6); }
+    .card-avatar.green  { background: linear-gradient(135deg, #1d8f73, #167a62); }
+    .card-avatar.orange { background: linear-gradient(135deg, #f99d77, #e87c55); }
+    .card-avatar.red    { background: linear-gradient(135deg, #d1515f, #b8404d); }
+
+    .card-name { font-size: 0.88rem; font-weight: 600; color: #1a0e40; }
+    .card-role { font-size: 0.74rem; color: var(--wf-ink-2); margin-top: 0.08rem; }
+
+    .card-footer {
+      margin-top: 0.55rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      border-radius: var(--radius-pill);
+      padding: 0.16rem 0.48rem;
+      font-size: 0.64rem;
+      font-weight: 700;
+    }
+
+    .chip.new        { background: rgba(124, 92, 252, 0.12); color: var(--wf-primary); }
+    .chip.shortlisted { background: rgba(29, 143, 115, 0.12); color: var(--wf-success); }
+    .chip.rejected   { background: rgba(209, 81, 95, 0.12); color: var(--wf-danger); }
+
+    .chip-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .card-time { font-size: 0.66rem; color: var(--wf-ink-2); }
+
+    /* Quick actions */
+    .card-actions {
+      display: none;
+      gap: 0.35rem;
+      margin-top: 0.55rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid var(--wf-border);
+    }
+
+    .card:hover .card-actions,
+    .card.selected .card-actions { display: flex; }
+    .lane.shortlisted .card .card-actions,
+    .lane.rejected .card .card-actions { display: none !important; }
+
+    .action-sm {
+      flex: 1;
+      border: none;
+      border-radius: 8px;
+      padding: 0.38rem 0;
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 150ms ease;
+    }
+
+    .action-sm:hover { opacity: 0.85; }
+    .action-sm.shortlist { background: rgba(29, 143, 115, 0.12); color: var(--wf-success); }
+    .action-sm.reject    { background: rgba(209, 81, 95, 0.12); color: var(--wf-danger); }
+
+    /* ───────────────────────────────────────────────
+       DECISION PANEL (right side)
+       ─────────────────────────────────────────────── */
+    .decision-panel {
+      background: var(--wf-surface);
+      border: 1px solid var(--wf-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      align-self: start;
+      position: sticky;
+      top: 1rem;
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: #1a0e40;
+    }
+
+    .panel-subtitle {
+      font-size: 0.8rem;
+      color: var(--wf-ink-2);
+      margin-top: 0.08rem;
+    }
+
+    .candidate-summary {
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-md);
+      background: var(--wf-surface-soft);
+      padding: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .summary-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7C5CFC, #5A3DD6);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+    }
+
+    .summary-name { font-size: 0.92rem; font-weight: 600; color: #1a0e40; }
+    .summary-role { font-size: 0.76rem; color: var(--wf-ink-2); margin-top: 0.04rem; }
+
+    .summary-chip {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      border-radius: var(--radius-pill);
+      padding: 0.2rem 0.5rem;
+      font-size: 0.64rem;
+      font-weight: 700;
+      background: rgba(124, 92, 252, 0.12);
+      color: var(--wf-primary);
+    }
+
+    /* Transitions */
+    .transitions { display: flex; gap: 0.45rem; }
+
+    .transition-option {
+      flex: 1;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--wf-border);
+      background: var(--wf-surface);
+      padding: 0.7rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 150ms ease, background 150ms ease;
+    }
+
+    .transition-option:hover { border-color: var(--wf-primary); }
+
+    .transition-option.active.shortlist {
+      border-color: var(--wf-success);
+      background: rgba(29, 143, 115, 0.06);
+    }
+
+    .transition-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin: 0 auto 0.35rem;
+      display: grid;
+      place-items: center;
+    }
+
+    .shortlist .transition-icon { background: rgba(29, 143, 115, 0.12); color: var(--wf-success); }
+    .reject .transition-icon    { background: rgba(209, 81, 95, 0.12); color: var(--wf-danger); }
+
+    .transition-label { font-size: 0.76rem; font-weight: 600; color: #1a0e40; }
+    .transition-hint  { font-size: 0.66rem; color: var(--wf-ink-2); margin-top: 0.1rem; }
+
+    /* Form */
+    .field { display: flex; flex-direction: column; gap: 0.28rem; }
+
+    .field label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--wf-ink-2);
+      font-weight: 600;
+    }
+
+    .field textarea {
+      width: 100%;
+      min-height: 78px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--wf-border);
+      background: var(--wf-surface);
+      color: var(--wf-ink);
+      padding: 0.6rem 0.7rem;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      resize: vertical;
+    }
+
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--wf-primary);
+      box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.12);
+    }
+
+    .char-count {
+      font-size: 0.66rem;
+      text-align: right;
+      color: var(--wf-success);
+    }
+
+    .btn-submit {
+      width: 100%;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 0.72rem;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      background: var(--wf-success);
+      transition: background 150ms ease;
+    }
+
+    .btn-submit:hover { background: #177d65; }
+
+    .info-banner {
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 0.7rem;
+      font-size: 0.72rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.35rem;
+      background: rgba(249, 157, 119, 0.12);
+      color: #8a5a3e;
+      border: 1px solid rgba(249, 157, 119, 0.35);
+    }
+
+    .info-banner svg { flex-shrink: 0; margin-top: 0.04rem; }
+
+    /* ───────────────────────────────────────────────
+       RULES BOX
+       ─────────────────────────────────────────────── */
+    .rules-box {
+      border: 1px solid rgba(124, 92, 252, 0.25);
+      background: rgba(124, 92, 252, 0.05);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+    }
+
+    .rules-header {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .rules-header svg { color: var(--wf-primary); flex-shrink: 0; }
+
+    .rules-header h3 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #1a0e40;
+    }
+
+    .rules-list {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .rules-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+      font-size: 0.78rem;
+      color: var(--wf-ink-2);
+      line-height: 1.4;
+    }
+
+    .rule-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      margin-top: 0.04rem;
+    }
+
+    .rule-icon.flow  { background: rgba(124, 92, 252, 0.10); color: var(--wf-primary); }
+    .rule-icon.lock  { background: rgba(209, 81, 95, 0.10); color: var(--wf-danger); }
+    .rule-icon.check { background: rgba(29, 143, 115, 0.10); color: var(--wf-success); }
+
+    .rules-list li strong { color: #1a0e40; }
+
+    /* ───────────────────────────────────────────────
+       RESPONSIVE
+       ─────────────────────────────────────────────── */
+    @media (max-width: 1120px) {
+      .workspace { grid-template-columns: 1fr; }
+      .decision-panel { position: static; }
+    }
+
+    @media (max-width: 880px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell { width: calc(100vw - 1rem); }
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.8rem;
+        border-radius: 16px;
+      }
+      .topbar-right { width: 100%; }
+      .topbar-search { flex: 1; }
+      .kanban {
+        display: flex;
+        overflow-x: auto;
+        gap: 0.6rem;
+        padding-bottom: 0.25rem;
+        scroll-snap-type: x mandatory;
+      }
+      .lane {
+        min-width: 280px;
+        flex: 0 0 280px;
+        scroll-snap-align: start;
+      }
+    }
+
+    /* ───────────────────────────────────────────────
+       ANIMATIONS
+       ─────────────────────────────────────────────── */
+    @keyframes slide-down {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+
+    <!-- ── TOPBAR ── -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="brand-mark" aria-hidden="true">W</div>
+        <div class="brand-text">
+          <h1>Candidate Manager</h1>
+          <p>Hiring Pipeline — 9 candidates</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search candidates…</span>
+        </div>
+        <button class="btn-add" type="button">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Candidate
+        </button>
+        <div class="avatar" title="Recruiter">JD</div>
+      </div>
+    </header>
+
+    <!-- ── STATS ── -->
+    <section class="stats-row" aria-label="Pipeline summary">
+      <article class="stat-card total">
+        <p class="stat-label">Total Candidates</p>
+        <p class="stat-value">9</p>
+        <p class="stat-meta">Across all stages</p>
+      </article>
+      <article class="stat-card new">
+        <p class="stat-label">New</p>
+        <p class="stat-value">4</p>
+        <p class="stat-meta">Awaiting decision</p>
+      </article>
+      <article class="stat-card short">
+        <p class="stat-label">Shortlisted</p>
+        <p class="stat-value">3</p>
+        <p class="stat-meta">Moving forward</p>
+      </article>
+      <article class="stat-card reject">
+        <p class="stat-label">Rejected</p>
+        <p class="stat-value">2</p>
+        <p class="stat-meta">Not proceeding</p>
+      </article>
+    </section>
+
+    <!-- ── WORKSPACE ── -->
+    <section class="workspace">
+
+      <!-- Board -->
+      <section class="board-panel" aria-label="Kanban board">
+        <div class="panel-headline">
+          <h2>Hiring Pipeline</h2>
+          <p>Drag cards or use quick actions to make decisions. Only NEW candidates can be moved.</p>
+        </div>
+
+        <div class="kanban">
+          <!-- NEW -->
+          <article class="lane new">
+            <div class="lane-header">
+              <div class="lane-title-group">
+                <span class="lane-dot"></span>
+                <span class="lane-title">New</span>
+              </div>
+              <span class="lane-count">4</span>
+            </div>
+            <div class="lane-body">
+              <article class="card selected">
+                <div class="card-top">
+                  <div>
+                    <p class="card-name">Alice Johnson</p>
+                    <p class="card-role">Frontend Engineer · Lisbon</p>
+                  </div>
+                  <div class="card-avatar purple">AJ</div>
+                </div>
+                <div class="card-footer">
+                  <span class="chip new"><span class="chip-dot"></span> NEW</span>
+                  <span class="card-time">2h ago</span>
+                </div>
+                <div class="card-actions">
+                  <button class="action-sm shortlist" type="button">Shortlist</button>
+                  <button class="action-sm reject" type="button">Reject</button>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-top">
+                  <div>
+                    <p class="card-name">Mateo Torres</p>
+                    <p class="card-role">Product Designer · Madrid</p>
+                  </div>
+                  <div class="card-avatar orange">MT</div>
+                </div>
+                <div class="card-footer">
+                  <span class="chip new"><span class="chip-dot"></span> NEW</span>
+                  <span class="card-time">45m ago</span>
+                </div>
+                <div class="card-actions">
+                  <button class="action-sm shortlist" type="button">Shortlist</button>
+                  <button class="action-sm reject" type="button">Reject</button>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-top">
+                  <div>
+                    <p class="card-name">Priya Nair</p>
+                    <p class="card-role">Data Analyst · Berlin</p>
+                  </div>
+                  <div class="card-avatar orange">PN</div>
+                </div>
+                <div class="card-footer">
+                  <span class="chip new"><span class="chip-dot"></span> NEW</span>
+                  <span class="card-time">1d ago</span>
+                </div>
+                <div class="card-actions">
+                  <button class="action-sm shortlist" type="button">Shortlist</button>
+                  <button class="action-sm reject" type="button">Reject</button>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-top">
+                  <div>
+                    <p class="card-name">Andre Silva</p>
+                    <p class="card-role">DevOps Engineer · Porto</p>
+                  </div>
+                  <div class="card-avatar purple">AS</div>
+                </div>
+                <div class="card-footer">
+                  <span class="chip new"><span class="chip-dot"></span> NEW</span>
+                  <span class="card-time">2d ago</span>
+                </div>
+                <div class="card-actions">
+                  <button class="action-sm shortlist" type="button">Shortlist</button>
+                  <button class="action-sm reject" type="button">Reject</button>
+                </div>
+              </article>
+            </div>
+          </article>
+
+          <!-- SHORTLISTED -->
+          <article class="lane shortlisted">
+            <div class="lane-header">
+              <div class="lane-title-group">
+                <span class="lane-dot"></span>
+                <span class="lane-title">Shortlisted</span>
+                <span class="lane-lock">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Final
+                </span>
+              </div>
+              <span class="lane-count">3</span>
+            </div>
+            <div class="lane-body">
+              <article class="card">
+                <div class="card-top">
+                  <div>
+                    <p class="card-name">Noah Bennett</p>
+                    <p class="card-role">Engineering Manager · London</p>
+                  </div>
+                  <div class="card-avatar green">NB</div>
+                </div>
+                <div class="card-footer">
+                  <span class="chip shortlisted"><span class="chip-dot"></span> SHORTLISTED</span>
+                  <span class="card-time">3h ago</span>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-top">
+                  <div>
+                    <p class="card-name">Sofia Moretti</p>
+                    <p class="card-role">QA Lead · Milan</p>
+                  </div>
+                  <div class="card-avatar green">SM</div>
+                </div>
+                <div class="card-footer">
+                  <span class="chip shortlisted"><span class="chip-dot"></span> SHORTLISTED</span>
+                  <span class="card-time">5h ago</span>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-top">
+                  <div>
+                    <p class="card-name">Clara Wu</p>
+                    <p class="card-role">Growth PM · Dublin</p>
+                  </div>
+                  <div class="card-avatar green">CW</div>
+                </div>
+                <div class="card-footer">
+                  <span class="chip shortlisted"><span class="chip-dot"></span> SHORTLISTED</span>
+                  <span class="card-time">1d ago</span>
+                </div>
+              </article>
+            </div>
+          </article>
+
+          <!-- REJECTED -->
+          <article class="lane rejected">
+            <div class="lane-header">
+              <div class="lane-title-group">
+                <span class="lane-dot"></span>
+                <span class="lane-title">Rejected</span>
+                <span class="lane-lock">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Final
+                </span>
+              </div>
+              <span class="lane-count">2</span>
+            </div>
+            <div class="lane-body">
+              <article class="card">
+                <div class="card-top">
+                  <div>
+                    <p class="card-name">Lucas Meyer</p>
+                    <p class="card-role">Backend Engineer · Amsterdam</p>
+                  </div>
+                  <div class="card-avatar red">LM</div>
+                </div>
+                <div class="card-footer">
+                  <span class="chip rejected"><span class="chip-dot"></span> REJECTED</span>
+                  <span class="card-time">1d ago</span>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-top">
+                  <div>
+                    <p class="card-name">Emily Ford</p>
+                    <p class="card-role">People Ops · Manchester</p>
+                  </div>
+                  <div class="card-avatar red">EF</div>
+                </div>
+                <div class="card-footer">
+                  <span class="chip rejected"><span class="chip-dot"></span> REJECTED</span>
+                  <span class="card-time">2d ago</span>
+                </div>
+              </article>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Decision Panel -->
+      <aside class="decision-panel" aria-label="Decision panel">
+        <div>
+          <h2 class="panel-title">Make Decision</h2>
+          <p class="panel-subtitle">Review and decide on the selected candidate.</p>
+        </div>
+
+        <div class="candidate-summary">
+          <div class="summary-avatar">AJ</div>
+          <div>
+            <p class="summary-name">Alice Johnson</p>
+            <p class="summary-role">Frontend Engineer · Lisbon</p>
+          </div>
+          <span class="summary-chip"><span class="chip-dot"></span> NEW</span>
+        </div>
+
+        <div class="transitions">
+          <div class="transition-option shortlist active">
+            <div class="transition-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <p class="transition-label">Shortlist</p>
+            <p class="transition-hint">Advance candidate</p>
+          </div>
+          <div class="transition-option reject">
+            <div class="transition-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <p class="transition-label">Reject</p>
+            <p class="transition-hint">Remove candidate</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Reason <span style="color: var(--wf-danger);">*</span></label>
+          <textarea>Strong portfolio quality and excellent communication skills during screening.</textarea>
+          <span class="char-count">67 / 10 min characters</span>
+        </div>
+
+        <button class="btn-submit" type="button">Shortlist Alice Johnson</button>
+
+        <div class="info-banner">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>This action is <strong>permanent</strong>. Shortlisted candidates cannot be rejected later.</span>
+        </div>
+
+        <!-- Business Rules -->
+        <div class="rules-box">
+          <div class="rules-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <h3>Business Rules</h3>
+          </div>
+          <ul class="rules-list">
+            <li>
+              <span class="rule-icon flow">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+              Only <strong>NEW</strong> candidates can receive decisions.
+            </li>
+            <li>
+              <span class="rule-icon lock">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              Cannot <strong>REJECT</strong> a <strong>SHORTLISTED</strong> candidate.
+            </li>
+            <li>
+              <span class="rule-icon lock">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              Cannot <strong>SHORTLIST</strong> a <strong>REJECTED</strong> candidate.
+            </li>
+            <li>
+              <span class="rule-icon check">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <strong>Reason</strong> is required (minimum 10 characters).
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+    </section>
+  </main>
+</body>
+</html>

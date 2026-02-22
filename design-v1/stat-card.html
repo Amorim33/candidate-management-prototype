@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Component — Stat Cards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --wf-primary: #7C5CFC;
+      --wf-ink: #2D1B69;
+      --wf-ink-2: #6B6085;
+      --wf-bg: #F6F4FB;
+      --wf-surface: #ffffff;
+      --wf-border: #E4DFF2;
+      --wf-success: #1d8f73;
+      --wf-danger: #d1515f;
+      --font-body: 'Kumbh Sans', system-ui, sans-serif;
+      --radius-lg: 16px;
+      --shadow-sm: 0 2px 8px rgba(45, 27, 105, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--wf-ink);
+      background: var(--wf-bg);
+      padding: 2rem;
+    }
+
+    .component-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--wf-ink-2);
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Stats Row ── */
+    .stats-row {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .stat-card {
+      background: var(--wf-surface);
+      border: 1px solid var(--wf-border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.1rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .stat-card.total::before  { background: var(--wf-primary); }
+    .stat-card.new::before    { background: var(--wf-primary); opacity: 0.5; }
+    .stat-card.short::before  { background: var(--wf-success); }
+    .stat-card.reject::before { background: var(--wf-danger); }
+
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--wf-ink-2);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1a0e40;
+      margin-top: 0.3rem;
+      line-height: 1;
+    }
+
+    .stat-meta {
+      font-size: 0.72rem;
+      color: var(--wf-ink-2);
+      margin-top: 0.35rem;
+    }
+
+    .stat-icon {
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+    }
+
+    .stat-card.total .stat-icon  { background: rgba(124, 92, 252, 0.10); color: var(--wf-primary); }
+    .stat-card.new .stat-icon    { background: rgba(124, 92, 252, 0.10); color: var(--wf-primary); }
+    .stat-card.short .stat-icon  { background: rgba(29, 143, 115, 0.10); color: var(--wf-success); }
+    .stat-card.reject .stat-icon { background: rgba(209, 81, 95, 0.10); color: var(--wf-danger); }
+
+    @media (max-width: 700px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <p class="component-label">Component: Stat Cards Row</p>
+
+  <div class="stats-row">
+    <article class="stat-card total">
+      <div class="stat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <p class="stat-label">Total Candidates</p>
+      <p class="stat-value">9</p>
+      <p class="stat-meta">Across all stages</p>
+    </article>
+
+    <article class="stat-card new">
+      <div class="stat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      </div>
+      <p class="stat-label">New</p>
+      <p class="stat-value">4</p>
+      <p class="stat-meta">Awaiting decision</p>
+    </article>
+
+    <article class="stat-card short">
+      <div class="stat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <p class="stat-label">Shortlisted</p>
+      <p class="stat-value">3</p>
+      <p class="stat-meta">Moving forward</p>
+    </article>
+
+    <article class="stat-card reject">
+      <div class="stat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <p class="stat-label">Rejected</p>
+      <p class="stat-value">2</p>
+      <p class="stat-meta">Not proceeding</p>
+    </article>
+  </div>
+</body>
+</html>

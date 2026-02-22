@@ -1,0 +1,45 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.new {
+  background: rgba(124,92,252,0.12);
+  color: var(--wf-primary);
+}
+
+.shortlisted {
+  background: rgba(90,61,214,0.12);
+  color: var(--wf-primary-dark);
+}
+
+.rejected {
+  background: rgba(152,144,173,0.12);
+  color: var(--wf-ink-3);
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.new .dot {
+  background: var(--wf-primary);
+}
+
+.shortlisted .dot {
+  background: var(--wf-primary-dark);
+}
+
+.rejected .dot {
+  background: var(--wf-ink-3);
+}
