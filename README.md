@@ -1,4 +1,5 @@
 # Candidate Management System: Claude as product designr and hexagonal architecutre exploration
+Demo URL: https://candidate-management-prototype.vercel.app/live-session
 
 ## Approach & Decision Record
 
