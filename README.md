@@ -143,9 +143,9 @@ A **separate controller layer was intentionally skipped** on the API routes. Sin
 - **Type checking**: `tsc --noEmit` — standard TypeScript compiler check without emitting files. Catches type errors across the entire project including Zod-inferred types and React Hook Form generics.
 
 ```bash
-npm run lint              # Run oxlint
-npm run lint:fix          # Run oxlint with auto-fix
-npm run typecheck         # Run tsc --noEmit
+bun run lint              # Run oxlint
+bun run lint:fix          # Run oxlint with auto-fix
+bun run typecheck         # Run tsc --noEmit
 ```
 
 ---
@@ -188,24 +188,37 @@ src/__tests__/e2e/tests/
 E2E tests use **page objects** (`src/__tests__/e2e/pages/`) for reusable selectors and actions, and **API helpers** for seeding data and making assertions.
 
 > Note: 1 worker is used for E2E tests to avoid race conditions (since storage is in-memory)
-
 ### Running Tests
 
 ```bash
-npm run test              # Unit tests (Vitest)
-npm run test:watch        # Unit tests in watch mode
-npm run test:e2e          # E2E tests (Playwright)
-npm run test:e2e:headed   # E2E tests with browser visible
-npm run test:e2e:ui       # E2E tests with Playwright UI
+bun run test              # Unit tests (Vitest)
+bun run test:watch        # Unit tests in watch mode
+bun run test:e2e          # E2E tests (Playwright)
+bun run test:e2e:headed   # E2E tests with browser visible
+bun run test:e2e:ui       # E2E tests with Playwright UI
 ```
+
+---
+
+## CI
+
+A GitHub Actions workflow runs on every push, executing three checks in sequence:
+
+1. **Typecheck** — `tsc --noEmit`
+2. **Lint** — `oxlint`
+3. **Test** — `vitest run`
+
+E2E tests (Playwright) are not included in CI for this version. The in-memory storage lacks strong concurrency guarantees, so E2E tests run with a single worker to avoid race conditions — this makes them too slow for a CI feedback loop.
+
+See [`.github/workflows/ci.yml`](.github/workflows/ci.yml) for the full configuration.
 
 ---
 
 ## Getting Started
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Open [http://localhost:3000/live-session](http://localhost:3000/live-session)
@@ -214,6 +227,7 @@ Open [http://localhost:3000/live-session](http://localhost:3000/live-session)
 
 ## Tech Stack
 
+- **Bun** — JavaScript runtime and package manager. Used for dependency management (`bun install`) and running scripts (`bun run`). Chosen for its speed — installs and script startup are noticeably faster than npm/yarn, which tightens both the local dev loop and CI feedback time.
 - **Next.js 14** — App Router, API Routes, SSR
 - **React 18** — Components, Context, Hooks
 - **TypeScript** — Strong typing throughout
