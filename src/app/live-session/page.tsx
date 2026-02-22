@@ -1,8 +1,9 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCandidates } from '@/providers/CandidatesProvider';
+import { useCandidatesListQuery } from '@/providers/useCandidatesListQuery';
 import MainHeader from '@/components/MainHeader';
 import StatsRow from '@/components/StatsRow';
 import FiltersBar, { SortOption } from '@/components/FiltersBar';
@@ -43,7 +44,7 @@ function NewCandidatesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedId = searchParams.get('candidateId');
-  const { candidates, error, refreshCandidates } = useCandidates();
+  const { requestRefresh } = useCandidates();
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortOption>('name-az');
@@ -55,41 +56,22 @@ function NewCandidatesContent() {
   const [isResizingDecisionPanel, setIsResizingDecisionPanel] = useState(false);
   const resizeStartRef = useRef<{ startX: number; startWidth: number } | null>(null);
 
-  const newCandidates = candidates.filter(c => c.status === 'NEW');
+  const {
+    items,
+    statusCount,
+    availableTags,
+    counts,
+    error,
+    isLoading,
+    hasLoadedOnce,
+  } = useCandidatesListQuery({
+    status: 'NEW',
+    search,
+    activeTags,
+    sort,
+  });
 
-  const filteredCandidates = useMemo(() => {
-    let result = newCandidates;
-
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter(c =>
-        c.name.toLowerCase().includes(q) ||
-        c.role.toLowerCase().includes(q) ||
-        c.location.toLowerCase().includes(q)
-      );
-    }
-
-    if (activeTags.size > 0) {
-      result = result.filter(c => c.tags?.some(t => activeTags.has(t)));
-    }
-
-    result = [...result].sort((a, b) => {
-      switch (sort) {
-        case 'newest':
-          return (b.decisionDate ?? '').localeCompare(a.decisionDate ?? '');
-        case 'oldest':
-          return (a.decisionDate ?? '').localeCompare(b.decisionDate ?? '');
-        case 'name-az':
-          return a.name.localeCompare(b.name);
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [newCandidates, search, activeTags, sort]);
-
-  const selectedCandidate = selectedId ? newCandidates.find(c => c.id === selectedId) ?? null : null;
+  const selectedCandidate = selectedId ? items.find(candidate => candidate.id === selectedId) ?? null : null;
   const maxDecisionPanelWidth = viewportWidth * 0.5;
   const minDecisionPanelWidth = Math.min(MIN_DECISION_PANEL_WIDTH, maxDecisionPanelWidth);
 
@@ -127,13 +109,24 @@ function NewCandidatesContent() {
     };
   }, [isResizingDecisionPanel]);
 
+  useEffect(() => {
+    if (!selectedId || !hasLoadedOnce) {
+      return;
+    }
+
+    const candidateExists = items.some(candidate => candidate.id === selectedId);
+    if (!candidateExists) {
+      router.replace('/live-session', { scroll: false });
+    }
+  }, [hasLoadedOnce, items, router, selectedId]);
+
   const handleSelect = (id: string) => {
-    router.push(`/live-session?candidateId=${id}`, { scroll: false });
+    router.replace(`/live-session?candidateId=${id}`, { scroll: false });
   };
 
-  const handleDecisionSubmitted = async () => {
-    await refreshCandidates();
-    router.push('/live-session', { scroll: false });
+  const handleDecisionSubmitted = () => {
+    requestRefresh();
+    router.replace('/live-session', { scroll: false });
   };
 
   const stopDecisionPanelResize = () => {
@@ -189,13 +182,14 @@ function NewCandidatesContent() {
     <>
       <MainHeader
         title="New Candidates"
-        countLabel={`${newCandidates.length} awaiting review`}
+        countLabel={`${statusCount} awaiting review`}
         countVariant="new"
         onAddCandidate={() => setShowModal(true)}
       />
-      <StatsRow candidates={candidates} />
+      <StatsRow counts={counts} />
       <FiltersBar
-        candidates={newCandidates}
+        allCount={statusCount}
+        availableTags={availableTags}
         search={search}
         onSearchChange={setSearch}
         activeTags={activeTags}
@@ -206,13 +200,16 @@ function NewCandidatesContent() {
       />
       <div style={workspaceStyle}>
         <section style={listPanelStyle}>
-          {error ? (
+          {error && (
             <div className={styles.listMessageError}>{error}</div>
-          ) : filteredCandidates.length === 0 ? (
+          )}
+          {isLoading && !hasLoadedOnce ? (
+            <div className={styles.listMessage}>Loading candidates...</div>
+          ) : items.length === 0 ? (
             <div className={styles.listMessage}>No new candidates to review right now.</div>
           ) : (
             <div style={listItemsStyle}>
-              {filteredCandidates.map((candidate, i) => (
+              {items.map((candidate, i) => (
                 <CandidateRow
                   key={candidate.id}
                   candidate={candidate}
@@ -252,7 +249,7 @@ function NewCandidatesContent() {
       {showModal && (
         <AddCandidateModal
           onClose={() => setShowModal(false)}
-          onCreated={refreshCandidates}
+          onCreated={requestRefresh}
         />
       )}
     </>

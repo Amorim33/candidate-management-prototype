@@ -16,11 +16,11 @@ const mainStyle: React.CSSProperties = {
 };
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
-  const { candidates } = useCandidates();
+  const { counts } = useCandidates();
 
   return (
     <div style={shellStyle}>
-      <Sidebar candidates={candidates} />
+      <Sidebar counts={counts} />
       <div style={mainStyle}>{children}</div>
     </div>
   );

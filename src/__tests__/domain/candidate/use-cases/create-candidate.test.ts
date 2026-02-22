@@ -8,6 +8,8 @@ function createMockRepository(overrides: Partial<CandidateRepository> = {}): Can
     findById: vi.fn(() => null),
     save: vi.fn(),
     nextId: vi.fn(() => '42'),
+    counts: vi.fn(() => ({ total: 0, new: 0, shortlisted: 0, rejected: 0 })),
+    availableTags: vi.fn(() => []),
     ...overrides,
   };
 }

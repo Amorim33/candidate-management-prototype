@@ -21,11 +21,40 @@ export const CandidateDTOSchema = z.object({
 });
 export type CandidateDTO = z.infer<typeof CandidateDTOSchema>;
 
+export const CandidateListSortSchema = z.enum(['newest', 'oldest', 'name-az']);
+export type CandidateListSort = z.infer<typeof CandidateListSortSchema>;
+
+export const CandidateListQuerySchema = z.object({
+  status: CandidateStatusSchema.optional(),
+  search: z.string().max(120).optional(),
+  tags: z.array(z.string().trim().min(1).max(50)).optional(),
+  sort: CandidateListSortSchema.default('newest'),
+});
+export type CandidateListQuery = z.infer<typeof CandidateListQuerySchema>;
+
+export const CandidateCountsSchema = z.object({
+  total: z.number().int().nonnegative(),
+  new: z.number().int().nonnegative(),
+  shortlisted: z.number().int().nonnegative(),
+  rejected: z.number().int().nonnegative(),
+});
+export type CandidateCounts = z.infer<typeof CandidateCountsSchema>;
+
+export const CandidateListResponseSchema = z.object({
+  items: z.array(CandidateDTOSchema),
+  filteredCount: z.number().int().nonnegative(),
+  statusCount: z.number().int().nonnegative(),
+  availableTags: z.array(z.string()),
+  counts: CandidateCountsSchema,
+});
+export type CandidateListResponse = z.infer<typeof CandidateListResponseSchema>;
+
 export const TagSchema = z
   .string()
   .trim()
   .min(1, 'Tag must not be empty')
-  .max(50, 'Tag is too long');
+  .max(50, 'Tag is too long')
+  .refine(value => !value.includes(','), 'Tag must not contain commas');
 
 export const CreateCandidateRequestSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(120, 'Name is too long'),

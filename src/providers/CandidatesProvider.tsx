@@ -1,29 +1,27 @@
 'use client';
 
-import { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import { CandidateDTO } from '@/domain/candidate/schemas';
+import { useState, useCallback, createContext, useContext } from 'react';
+import { CandidateCounts } from '@/domain/candidate/schemas';
 
-async function getAllCandidates(): Promise<CandidateDTO[]> {
-  const response = await fetch('/api/candidates');
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || 'Failed to fetch candidates');
-  }
-
-  return data;
-}
+const EMPTY_COUNTS: CandidateCounts = {
+  total: 0,
+  new: 0,
+  shortlisted: 0,
+  rejected: 0,
+};
 
 interface CandidatesContextValue {
-  candidates: CandidateDTO[];
-  error: string | null;
-  refreshCandidates: () => Promise<void>;
+  counts: CandidateCounts;
+  refreshToken: number;
+  setCounts: (counts: CandidateCounts) => void;
+  requestRefresh: () => void;
 }
 
 const CandidatesContext = createContext<CandidatesContextValue>({
-  candidates: [],
-  error: null,
-  refreshCandidates: async () => {},
+  counts: EMPTY_COUNTS,
+  refreshToken: 0,
+  setCounts: () => {},
+  requestRefresh: () => {},
 });
 
 export function useCandidates() {
@@ -31,25 +29,15 @@ export function useCandidates() {
 }
 
 export default function CandidatesProvider({ children }: { children: React.ReactNode }) {
-  const [candidates, setCandidates] = useState<CandidateDTO[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [counts, setCounts] = useState<CandidateCounts>(EMPTY_COUNTS);
+  const [refreshToken, setRefreshToken] = useState(0);
 
-  const refreshCandidates = useCallback(async () => {
-    try {
-      const data = await getAllCandidates();
-      setCandidates(data);
-      setError(null);
-    } catch {
-      setError('Failed to load candidates');
-    }
+  const requestRefresh = useCallback(() => {
+    setRefreshToken(current => current + 1);
   }, []);
 
-  useEffect(() => {
-    refreshCandidates();
-  }, [refreshCandidates]);
-
   return (
-    <CandidatesContext.Provider value={{ candidates, error, refreshCandidates }}>
+    <CandidatesContext.Provider value={{ counts, refreshToken, setCounts, requestRefresh }}>
       {children}
     </CandidatesContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { decideCandidateUseCase } from '@/domain/candidate/use-cases/decide-candidate';
 import { CandidateRepository } from '@/domain/candidate/repository';
 import { CandidateEntity } from '@/domain/candidate/entity';
@@ -10,6 +10,8 @@ function createMockRepository(overrides: Partial<CandidateRepository> = {}): Can
     findById: vi.fn(() => null),
     save: vi.fn(),
     nextId: vi.fn(() => '1'),
+    counts: vi.fn(() => ({ total: 0, new: 0, shortlisted: 0, rejected: 0 })),
+    availableTags: vi.fn(() => []),
     ...overrides,
   };
 }

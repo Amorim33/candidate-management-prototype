@@ -43,15 +43,17 @@ test.describe('Shortlisted page', () => {
     await expect(shortlistedPage.allCandidateNames().first()).toHaveText('Diego Morales');
   });
 
-  test('role filter chips work correctly', async ({ shortlistedPage, page }) => {
+  test('role filter chips work correctly', async ({ shortlistedPage }) => {
     await shortlistedPage.goto();
 
-    // Engineering filter should show Lucas Ferreira (DevOps) and Diego Morales (Senior Backend)
-    await shortlistedPage.filtersBar.selectFilter('Engineering');
-    await expect(shortlistedPage.allCandidateNames()).toHaveCount(2);
+    // backend filter should show Diego Morales (Senior Backend Engineer)
+    await shortlistedPage.filtersBar.selectFilter('backend');
+    await expect(shortlistedPage.allCandidateNames()).toHaveCount(1);
+    await expect(shortlistedPage.allCandidateNames().first()).toHaveText('Diego Morales');
 
-    // Design filter should show Isabella Silva (UX Researcher)
-    await shortlistedPage.filtersBar.selectFilter('Design');
+    // Reset filters, then design filter should show Isabella Silva (UX Researcher)
+    await shortlistedPage.filtersBar.selectFilter('All');
+    await shortlistedPage.filtersBar.selectFilter('design');
     await expect(shortlistedPage.allCandidateNames()).toHaveCount(1);
     await expect(shortlistedPage.allCandidateNames().first()).toHaveText('Isabella Silva');
 
@@ -80,12 +82,45 @@ test.describe('Shortlisted page', () => {
   test('search and filter combine correctly', async ({ shortlistedPage }) => {
     await shortlistedPage.goto();
 
-    await shortlistedPage.filtersBar.selectFilter('Engineering');
+    // Select both backend and devops tags to get 2 candidates
+    await shortlistedPage.filtersBar.selectFilter('backend');
+    await shortlistedPage.filtersBar.selectFilter('devops');
     await expect(shortlistedPage.allCandidateNames()).toHaveCount(2);
 
-    // Search within Engineering filter
+    // Search within active filters
     await shortlistedPage.filtersBar.search('diego');
     await expect(shortlistedPage.allCandidateNames()).toHaveCount(1);
     await expect(shortlistedPage.allCandidateNames().first()).toHaveText('Diego Morales');
+  });
+
+  test('active filters keep tag chips stable', async ({ shortlistedPage }) => {
+    await shortlistedPage.goto();
+
+    await shortlistedPage.filtersBar.selectFilter('backend');
+    await expect(shortlistedPage.filtersBar.filterChip('design')).toBeVisible();
+    await expect(shortlistedPage.filtersBar.filterChip('devops')).toBeVisible();
+  });
+
+  test('filtering controls send backend query params', async ({ shortlistedPage, page }) => {
+    await shortlistedPage.goto();
+
+    const responsePromise = page.waitForResponse(response => {
+      if (!response.url().includes('/api/candidates?')) {
+        return false;
+      }
+
+      const url = new URL(response.url());
+      return url.searchParams.get('status') === 'SHORTLISTED'
+        && url.searchParams.get('sort') === 'name-az'
+        && url.searchParams.get('tags') === 'backend'
+        && url.searchParams.get('search') === 'diego';
+    });
+
+    await shortlistedPage.filtersBar.selectFilter('backend');
+    await shortlistedPage.filtersBar.selectSort('name-az');
+    await shortlistedPage.filtersBar.search('diego');
+
+    const response = await responsePromise;
+    expect(response.status()).toBe(200);
   });
 });

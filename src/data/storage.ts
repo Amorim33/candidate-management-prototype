@@ -3,9 +3,17 @@ import {
   createCandidateEntity,
 } from '@/domain/candidate/entity';
 import { CandidateRepository } from '@/domain/candidate/repository';
+import {
+  CandidateCounts,
+  CandidateListQuery,
+  CandidateStatus,
+} from '@/domain/candidate/schemas';
 
 function cloneCandidate(candidate: CandidateEntity): CandidateEntity {
-  return { ...candidate };
+  return {
+    ...candidate,
+    tags: candidate.tags ? [...candidate.tags] : undefined,
+  };
 }
 
 function parseCandidateId(id: string): number | null {
@@ -14,12 +22,110 @@ function parseCandidateId(id: string): number | null {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
+function candidateIdValue(candidate: CandidateEntity): number {
+  return parseCandidateId(candidate.id) ?? 0;
+}
+
+function candidateDecisionDateValue(candidate: CandidateEntity): number {
+  if (!candidate.decisionDate) {
+    return 0;
+  }
+
+  const parsed = Date.parse(`${candidate.decisionDate}T00:00:00Z`);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function applyStatusFilter(
+  candidates: CandidateEntity[],
+  status?: CandidateStatus,
+): CandidateEntity[] {
+  if (!status) {
+    return candidates;
+  }
+
+  return candidates.filter(candidate => candidate.status === status);
+}
+
+function applySearchFilter(
+  candidates: CandidateEntity[],
+  search?: string,
+): CandidateEntity[] {
+  if (!search) {
+    return candidates;
+  }
+
+  const normalizedSearch = search.toLowerCase();
+  return candidates.filter(candidate => (
+    candidate.name.toLowerCase().includes(normalizedSearch)
+    || candidate.role.toLowerCase().includes(normalizedSearch)
+    || candidate.location.toLowerCase().includes(normalizedSearch)
+  ));
+}
+
+function applyTagsFilter(
+  candidates: CandidateEntity[],
+  tags?: string[],
+): CandidateEntity[] {
+  if (!tags || tags.length === 0) {
+    return candidates;
+  }
+
+  const activeTags = new Set(tags);
+  return candidates.filter(candidate => candidate.tags?.some(tag => activeTags.has(tag)));
+}
+
+function sortCandidates(
+  candidates: CandidateEntity[],
+  query: CandidateListQuery,
+): CandidateEntity[] {
+  const next = [...candidates];
+
+  if (query.sort === 'name-az') {
+    next.sort((a, b) => a.name.localeCompare(b.name));
+    return next;
+  }
+
+  const sortByDecisionDate = query.status === 'SHORTLISTED' || query.status === 'REJECTED';
+
+  if (query.sort === 'newest') {
+    next.sort((a, b) => {
+      if (sortByDecisionDate) {
+        const dateDiff = candidateDecisionDateValue(b) - candidateDecisionDateValue(a);
+        if (dateDiff !== 0) {
+          return dateDiff;
+        }
+      }
+
+      return candidateIdValue(b) - candidateIdValue(a);
+    });
+    return next;
+  }
+
+  next.sort((a, b) => {
+    if (sortByDecisionDate) {
+      const dateDiff = candidateDecisionDateValue(a) - candidateDecisionDateValue(b);
+      if (dateDiff !== 0) {
+        return dateDiff;
+      }
+    }
+
+    return candidateIdValue(a) - candidateIdValue(b);
+  });
+
+  return next;
+}
+
 class InMemoryCandidateRepository implements CandidateRepository {
   private store = new Map<string, CandidateEntity>();
   private nextIdNumber = 1;
 
-  list(): CandidateEntity[] {
-    return Array.from(this.store.values(), cloneCandidate);
+  list(query?: CandidateListQuery): CandidateEntity[] {
+    const normalizedQuery: CandidateListQuery = query ?? { sort: 'newest' };
+    const candidates = Array.from(this.store.values(), cloneCandidate);
+    const statusFiltered = applyStatusFilter(candidates, normalizedQuery.status);
+    const searchFiltered = applySearchFilter(statusFiltered, normalizedQuery.search);
+    const tagsFiltered = applyTagsFilter(searchFiltered, normalizedQuery.tags);
+    return sortCandidates(tagsFiltered, normalizedQuery);
   }
 
   findById(id: string): CandidateEntity | null {
@@ -42,8 +148,43 @@ class InMemoryCandidateRepository implements CandidateRepository {
     return id;
   }
 
-  seed(candidate: CandidateEntity): void {
-    this.save(candidate);
+  counts(): CandidateCounts {
+    const counts: CandidateCounts = {
+      total: 0,
+      new: 0,
+      shortlisted: 0,
+      rejected: 0,
+    };
+
+    for (const candidate of this.store.values()) {
+      counts.total += 1;
+
+      if (candidate.status === 'NEW') {
+        counts.new += 1;
+      } else if (candidate.status === 'SHORTLISTED') {
+        counts.shortlisted += 1;
+      } else {
+        counts.rejected += 1;
+      }
+    }
+
+    return counts;
+  }
+
+  availableTags(status?: CandidateStatus): string[] {
+    const tagSet = new Set<string>();
+
+    for (const candidate of this.store.values()) {
+      if (status && candidate.status !== status) {
+        continue;
+      }
+
+      for (const tag of candidate.tags ?? []) {
+        tagSet.add(tag);
+      }
+    }
+
+    return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
   }
 
   reset(): void {
@@ -52,11 +193,12 @@ class InMemoryCandidateRepository implements CandidateRepository {
   }
 }
 
+// Demo-only in-memory singleton. Production deployments should use persistent storage.
 const repository = new InMemoryCandidateRepository();
 
 function seedRepository() {
   // 4 NEW candidates
-  repository.seed(
+  repository.save(
     createCandidateEntity({
       id: 'c_1',
       name: 'Maria Santos',
@@ -67,7 +209,7 @@ function seedRepository() {
     }),
   );
 
-  repository.seed(
+  repository.save(
     createCandidateEntity({
       id: 'c_2',
       name: 'João Pereira',
@@ -78,7 +220,7 @@ function seedRepository() {
     }),
   );
 
-  repository.seed(
+  repository.save(
     createCandidateEntity({
       id: 'c_3',
       name: 'Ana Costa',
@@ -89,7 +231,7 @@ function seedRepository() {
     }),
   );
 
-  repository.seed(
+  repository.save(
     createCandidateEntity({
       id: 'c_4',
       name: 'Carlos Fernandez',
@@ -101,7 +243,7 @@ function seedRepository() {
   );
 
   // 3 SHORTLISTED candidates
-  repository.seed(
+  repository.save(
     createCandidateEntity({
       id: 'c_5',
       name: 'Lucas Ferreira',
@@ -115,7 +257,7 @@ function seedRepository() {
     }),
   );
 
-  repository.seed(
+  repository.save(
     createCandidateEntity({
       id: 'c_6',
       name: 'Isabella Silva',
@@ -130,7 +272,7 @@ function seedRepository() {
     }),
   );
 
-  repository.seed(
+  repository.save(
     createCandidateEntity({
       id: 'c_7',
       name: 'Diego Morales',
@@ -146,7 +288,7 @@ function seedRepository() {
   );
 
   // 2 REJECTED candidates
-  repository.seed(
+  repository.save(
     createCandidateEntity({
       id: 'c_8',
       name: 'Ricardo Torres',
@@ -160,7 +302,7 @@ function seedRepository() {
     }),
   );
 
-  repository.seed(
+  repository.save(
     createCandidateEntity({
       id: 'c_9',
       name: 'Patricia Mendes',

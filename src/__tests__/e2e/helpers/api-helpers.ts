@@ -6,8 +6,16 @@ export async function resetData(request: APIRequestContext) {
   return request.post('/api/reset');
 }
 
-export async function getAllCandidates(request: APIRequestContext) {
-  return request.get(BASE);
+export async function getAllCandidates(
+  request: APIRequestContext,
+  query?: Record<string, string>,
+) {
+  if (!query) {
+    return request.get(BASE);
+  }
+
+  const params = new URLSearchParams(query);
+  return request.get(`${BASE}?${params.toString()}`);
 }
 
 export async function createCandidate(

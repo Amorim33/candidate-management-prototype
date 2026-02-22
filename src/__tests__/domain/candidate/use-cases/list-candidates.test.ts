@@ -9,47 +9,95 @@ function createMockRepository(overrides: Partial<CandidateRepository> = {}): Can
     findById: vi.fn(() => null),
     save: vi.fn(),
     nextId: vi.fn(() => '1'),
+    counts: vi.fn(() => ({
+      total: 0,
+      new: 0,
+      shortlisted: 0,
+      rejected: 0,
+    })),
+    availableTags: vi.fn(() => []),
     ...overrides,
   };
 }
 
 describe('listCandidatesUseCase', () => {
-  it('returns empty array when no candidates exist', () => {
+  it('returns response envelope with default newest sort', () => {
     const repo = createMockRepository({ list: vi.fn(() => []) });
 
     const result = listCandidatesUseCase(repo);
 
-    expect(result).toEqual([]);
+    expect(repo.list).toHaveBeenCalledWith(expect.objectContaining({ sort: 'newest' }));
+    expect(result).toEqual({
+      items: [],
+      filteredCount: 0,
+      statusCount: 0,
+      availableTags: [],
+      counts: {
+        total: 0,
+        new: 0,
+        shortlisted: 0,
+        rejected: 0,
+      },
+    });
   });
 
-  it('returns DTOs for all candidates in repository', () => {
+  it('returns DTOs and metadata for filtered queries', () => {
     const candidates: CandidateEntity[] = [
       {
-        id: '1',
-        name: 'Alice',
-        status: 'NEW',
-        role: 'Engineer',
-        location: 'Berlin',
-        linkedin: 'https://linkedin.com/in/alice',
-      },
-      {
-        id: '2',
-        name: 'Bob',
+        id: 'c_7',
+        name: 'Diego',
         status: 'SHORTLISTED',
-        role: 'Designer',
-        location: 'London',
-        linkedin: 'https://linkedin.com/in/bob',
-        reason: 'Great portfolio',
-        decisionDate: '2025-01-01',
+        role: 'Backend Engineer',
+        location: 'Buenos Aires',
+        linkedin: 'https://linkedin.com/in/diego',
+        reason: 'Strong systems background',
+        decisionDate: '2026-02-12',
+        tags: ['backend'],
       },
     ];
-    const repo = createMockRepository({ list: vi.fn(() => candidates) });
 
-    const result = listCandidatesUseCase(repo);
+    const repo = createMockRepository({
+      list: vi.fn(() => candidates),
+      counts: vi.fn(() => ({ total: 9, new: 4, shortlisted: 3, rejected: 2 })),
+      availableTags: vi.fn(() => ['backend', 'design', 'devops']),
+    });
 
-    expect(result).toHaveLength(2);
-    expect(result[0].id).toBe('1');
-    expect(result[1].id).toBe('2');
-    expect(result[1].status).toBe('SHORTLISTED');
+    const result = listCandidatesUseCase(repo, {
+      status: 'SHORTLISTED',
+      search: 'engineer',
+      tags: ['backend', 'devops'],
+      sort: 'name-az',
+    });
+
+    expect(repo.list).toHaveBeenCalledWith({
+      status: 'SHORTLISTED',
+      search: 'engineer',
+      tags: ['backend', 'devops'],
+      sort: 'name-az',
+    });
+    expect(repo.availableTags).toHaveBeenCalledWith('SHORTLISTED');
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]).toMatchObject({
+      id: 'c_7',
+      name: 'Diego',
+      status: 'SHORTLISTED',
+    });
+    expect(result.filteredCount).toBe(1);
+    expect(result.statusCount).toBe(3);
+    expect(result.availableTags).toEqual(['backend', 'design', 'devops']);
+    expect(result.counts).toEqual({ total: 9, new: 4, shortlisted: 3, rejected: 2 });
+  });
+
+  it('uses total as statusCount when status filter is omitted', () => {
+    const repo = createMockRepository({
+      counts: vi.fn(() => ({ total: 9, new: 4, shortlisted: 3, rejected: 2 })),
+    });
+
+    const result = listCandidatesUseCase(repo, {
+      sort: 'oldest',
+    });
+
+    expect(result.statusCount).toBe(9);
   });
 });

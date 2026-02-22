@@ -6,16 +6,78 @@ test.describe('API routes validation', () => {
     await resetData(request);
   });
 
-  test('GET /api/candidates returns all 9 candidates', async ({ request }) => {
+  test('GET /api/candidates returns envelope with all 9 candidates', async ({ request }) => {
     const response = await getAllCandidates(request);
     expect(response.status()).toBe(200);
 
-    const candidates = await response.json();
-    expect(candidates).toHaveLength(9);
-    expect(candidates[0]).toHaveProperty('id');
-    expect(candidates[0]).toHaveProperty('name');
-    expect(candidates[0]).toHaveProperty('status');
-    expect(candidates[0]).toHaveProperty('role');
+    const body = await response.json();
+    expect(body).toHaveProperty('items');
+    expect(body).toHaveProperty('filteredCount', 9);
+    expect(body).toHaveProperty('statusCount', 9);
+    expect(body).toHaveProperty('availableTags');
+    expect(body).toHaveProperty('counts');
+
+    expect(body.items).toHaveLength(9);
+    expect(body.items[0]).toHaveProperty('id');
+    expect(body.items[0]).toHaveProperty('name');
+    expect(body.items[0]).toHaveProperty('status');
+    expect(body.items[0]).toHaveProperty('role');
+    expect(body.filteredCount).toBe(body.items.length);
+  });
+
+  test('GET /api/candidates supports backend status + search + tags + sort', async ({ request }) => {
+    const response = await getAllCandidates(request, {
+      status: 'SHORTLISTED',
+      search: 'engineer',
+      tags: 'backend,devops',
+      sort: 'name-az',
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+
+    expect(body.items).toHaveLength(2);
+    expect(body.items.map((candidate: { name: string }) => candidate.name)).toEqual([
+      'Diego Morales',
+      'Lucas Ferreira',
+    ]);
+    expect(body.statusCount).toBe(3);
+    expect(body.filteredCount).toBe(2);
+  });
+
+  test('GET /api/candidates uses default newest sort when sort is omitted', async ({ request }) => {
+    const response = await getAllCandidates(request, {
+      status: 'NEW',
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.items.map((candidate: { id: string }) => candidate.id)).toEqual([
+      'c_4',
+      'c_3',
+      'c_2',
+      'c_1',
+    ]);
+  });
+
+  test('GET /api/candidates validates invalid status', async ({ request }) => {
+    const response = await getAllCandidates(request, {
+      status: 'INVALID',
+    });
+
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body.error).toBeTruthy();
+  });
+
+  test('GET /api/candidates validates invalid sort', async ({ request }) => {
+    const response = await getAllCandidates(request, {
+      sort: 'invalid-sort',
+    });
+
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body.error).toBeTruthy();
   });
 
   test('POST /api/candidates validates missing name', async ({ request }) => {
@@ -36,6 +98,15 @@ test.describe('API routes validation', () => {
     expect(response.status()).toBe(400);
     const body = await response.json();
     expect(body.error).toContain('LinkedIn');
+  });
+
+  test('POST /api/candidates accepts empty LinkedIn string as optional', async ({ request }) => {
+    const response = await createCandidate(request, {
+      name: 'Optional Linkedin Candidate',
+      linkedin: '',
+    });
+
+    expect(response.status()).toBe(201);
   });
 
   test('POST /api/candidates/[id]/decision validates missing fields', async ({ request }) => {
@@ -119,6 +190,15 @@ test.describe('API routes validation', () => {
     expect(response.status()).toBe(400);
   });
 
+  test('POST /api/candidates validates tags containing commas', async ({ request }) => {
+    const response = await createCandidate(request, {
+      name: 'Comma Tag Candidate',
+      tags: ['c++, c#'],
+    });
+
+    expect(response.status()).toBe(400);
+  });
+
   test('POST /api/candidates/[id]/decision preserves tags after decision', async ({ request }) => {
     // Create candidate with tags, then decide — tags should be preserved
     const createResponse = await createCandidate(request, {
@@ -138,8 +218,8 @@ test.describe('API routes validation', () => {
 
   test('GET /api/candidates returns tags on seeded candidates', async ({ request }) => {
     const response = await getAllCandidates(request);
-    const candidates = await response.json();
-    const shortlistedWithTags = candidates.find((c: { id: string }) => c.id === 'c_5');
-    expect(shortlistedWithTags.tags).toEqual(['culture-fit', 'infrastructure']);
+    const body = await response.json();
+    const shortlistedWithTags = body.items.find((candidate: { id: string }) => candidate.id === 'c_5');
+    expect(shortlistedWithTags.tags).toEqual(['devops', 'infrastructure']);
   });
 });

@@ -1,12 +1,13 @@
 'use client';
 
-import { CandidateDTO } from '@/domain/candidate/schemas';
+import { CandidateListSort, CandidateListSortSchema } from '@/domain/candidate/schemas';
 import styles from './FiltersBar.module.css';
 
-export type SortOption = 'newest' | 'oldest' | 'name-az';
+export type SortOption = CandidateListSort;
 
 interface FiltersBarProps {
-  candidates: CandidateDTO[];
+  allCount: number;
+  availableTags: string[];
   search: string;
   onSearchChange: (value: string) => void;
   activeTags: Set<string>;
@@ -16,16 +17,9 @@ interface FiltersBarProps {
   searchPlaceholder?: string;
 }
 
-function getUniqueTags(candidates: CandidateDTO[]): string[] {
-  const tagSet = new Set<string>();
-  for (const c of candidates) {
-    for (const t of c.tags ?? []) tagSet.add(t);
-  }
-  return Array.from(tagSet).sort();
-}
-
 export default function FiltersBar({
-  candidates,
+  allCount,
+  availableTags,
   search,
   onSearchChange,
   activeTags,
@@ -34,8 +28,6 @@ export default function FiltersBar({
   onSortChange,
   searchPlaceholder = 'Search candidates...',
 }: FiltersBarProps) {
-  const allTags = getUniqueTags(candidates);
-
   const toggleTag = (tag: string) => {
     const next = new Set(activeTags);
     if (next.has(tag)) next.delete(tag);
@@ -67,14 +59,14 @@ export default function FiltersBar({
           onClick={() => onTagChange(new Set())}
           data-testid="filter-chip-All"
         >
-          All <span className={styles.chipCount}>{candidates.length}</span>
+          All <span className={styles.chipCount}>{allCount}</span>
         </button>
-        {allTags.map(tag => (
+        {availableTags.map(tag => (
           <button
             key={tag}
             className={`${styles.tagChip} ${activeTags.has(tag) ? styles.tagChipActive : ''}`}
             onClick={() => toggleTag(tag)}
-            data-testid={`tag-filter-${tag}`}
+            data-testid={`filter-chip-${tag}`}
           >
             {tag}
           </button>
@@ -85,7 +77,12 @@ export default function FiltersBar({
         <select
           className={styles.sortSelect}
           value={sort}
-          onChange={e => onSortChange(e.target.value as SortOption)}
+          onChange={event => {
+            const parsedSort = CandidateListSortSchema.safeParse(event.target.value);
+            if (parsedSort.success) {
+              onSortChange(parsedSort.data);
+            }
+          }}
           data-testid="sort-select"
         >
           <option value="newest">Newest first</option>

@@ -55,7 +55,7 @@ test.describe('Decision panel validation', () => {
     await expect(liveSessionPage.decisionPanel.submitButton).toContainText('Confirm Rejection');
   });
 
-  test('"This action is permanent" warning is visible', async ({ liveSessionPage, page }) => {
+  test('"This action is permanent" warning is visible', async ({ page }) => {
     await expect(page.getByText('This action is permanent.')).toBeVisible();
   });
 });

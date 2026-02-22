@@ -2,25 +2,21 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CandidateDTO } from '@/domain/candidate/schemas';
+import { CandidateCounts } from '@/domain/candidate/schemas';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
-  candidates: CandidateDTO[];
+  counts: CandidateCounts;
 }
 
-export default function Sidebar({ candidates }: SidebarProps) {
+export default function Sidebar({ counts }: SidebarProps) {
   const pathname = usePathname();
-
-  const newCount = candidates.filter(c => c.status === 'NEW').length;
-  const shortlistedCount = candidates.filter(c => c.status === 'SHORTLISTED').length;
-  const rejectedCount = candidates.filter(c => c.status === 'REJECTED').length;
 
   const navItems = [
     {
       href: '/live-session',
       label: 'New Candidates',
-      count: newCount,
+      count: counts.new,
       testId: 'new',
       icon: (
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -32,7 +28,7 @@ export default function Sidebar({ candidates }: SidebarProps) {
     {
       href: '/live-session/shortlisted',
       label: 'Shortlisted',
-      count: shortlistedCount,
+      count: counts.shortlisted,
       testId: 'shortlisted',
       icon: (
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -44,7 +40,7 @@ export default function Sidebar({ candidates }: SidebarProps) {
     {
       href: '/live-session/rejected',
       label: 'Rejected',
-      count: rejectedCount,
+      count: counts.rejected,
       testId: 'rejected',
       icon: (
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
