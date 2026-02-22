@@ -4,19 +4,19 @@
 
 ### UI-First Development
 
-Started with the interface design before writing any business logic. By knowing exactly what the UI expects, I could design APIs that avoid overfetching and underfetching, and prioritize user experience without being constrained by premature architectural or data decisions.
+The interface design was done before writing any business logic. By knowing exactly what the UI expects, APIs were designed to avoid overfetching and underfetching, and user experience was prioritized without being constrained by premature architectural or data decisions.
 
 ### Design Exploration
 
-I used Claude Code to explore the design using HTML and CSS as a "figma board" — no JS, just static layouts to iterate fast on visual ideas.
+Claude Code was used to explore the design using HTML and CSS as a "figma board" — no JS, just static layouts to iterate fast on visual ideas.
 
 **Design v1 — Kanban Board**
 
-My first instinct was a Kanban board with three columns: New, Shortlisted, and Rejected. This is a familiar pattern in market candidate management tools.
+The first instinct was a Kanban board with three columns: New, Shortlisted, and Rejected. This is a familiar pattern in market candidate management tools.
 
-<!-- ![Design v1 — Kanban Board](screenshots/design-v1.png) -->
+<img width="1498" height="858" alt="Screenshot 2026-02-22 at 16 33 59" src="https://github.com/user-attachments/assets/324c03ae-8675-4132-9588-116d653836c5" />
 
-However, I realized a UX problem: Shortlisted and Rejected are **terminal states**, once a candidate moves there, the column is immutable. Having two out of three columns locked is counterintuitive for a board layout.
+However, a UX problem was identified: Shortlisted and Rejected are **terminal states**, once a candidate moves there, the column is immutable. Having two out of three columns locked is counterintuitive for a board layout.
 
 **Design v2 — Decision-Centric Layout**
 
@@ -36,7 +36,7 @@ So v2 shifts to a **search-and-decide UX**:
 - **Shortlisted / Rejected tabs**: Read-only lists for conciliation and conferring purposes, with search, tag filters, and sorting.
 - **Prefetched navigation**: Tabs pre-load on hover/focus for fluid transitions.
 
-<!-- ![Design v2 — Home](screenshots/design-v2-home.png) -->
+<img width="1495" height="856" alt="Screenshot 2026-02-22 at 16 36 11" src="https://github.com/user-attachments/assets/77728c6d-0eb6-4086-a270-c47db303a752" />
 <!-- ![Design v2 — Decision Panel](screenshots/design-v2-decision.png) -->
 <!-- ![Design v2 — Shortlisted](screenshots/design-v2-shortlisted.png) -->
 
@@ -53,9 +53,9 @@ Additional UX decisions:
 
 ### Architecture Decision: Hexagonal / Clean Architecture
 
-For the backend I went with **Hexagonal Architecture**, isolating the domain layer with all business rules and using dependency inversion for the repository interface.
+The backend was built with **Hexagonal Architecture**, isolating the domain layer with all business rules and using dependency inversion for the repository interface.
 
-I decided to **skip a separate controller layer** on the API routes. Since Next.js route handlers can call domain use cases directly and there are no additional business rules for the HTTP layer to handle, a controller would be pure indirection. HTTP status codes and error mapping are necessarily coupled to the Next.js framework, so they live in the route files. The collocation is intuitive: look at route files for HTTP handling, look at the domain for business rules.
+A **separate controller layer was intentionally skipped** on the API routes. Since Next.js route handlers can call domain use cases directly and there are no additional business rules for the HTTP layer to handle, a controller would be pure indirection. HTTP status codes and error mapping are necessarily coupled to the Next.js framework, so they live in the route files. The collocation is intuitive: look at route files for HTTP handling, look at the domain for business rules.
 
 ---
 
@@ -138,7 +138,7 @@ I decided to **skip a separate controller layer** on the API routes. Since Next.
 
 ## Lint & Type Checking
 
-- **Linting**: [oxlint](https://oxc.rs/docs/guide/usage/linter) — a fast Rust-based linter. Chose it over ESLint for speed; it runs in milliseconds even on the full codebase, making it practical to run on every save and in CI without slowing down the feedback loop.
+- **Linting**: [oxlint](https://oxc.rs/docs/guide/usage/linter) — a fast Rust-based linter. Chosen over ESLint for speed; it runs in milliseconds even on the full codebase, making it practical to run on every save and in CI without slowing down the feedback loop.
 - **Type checking**: `tsc --noEmit` — standard TypeScript compiler check without emitting files. Catches type errors across the entire project including Zod-inferred types and React Hook Form generics.
 
 ```bash
