@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { CandidateCounts } from '@/domain/candidate/schemas';
 import styles from './Sidebar.module.css';
 
@@ -11,6 +11,11 @@ interface SidebarProps {
 
 export default function Sidebar({ counts }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handlePrefetchIntent = (href: string) => {
+    router.prefetch(href);
+  };
 
   const navItems = [
     {
@@ -70,6 +75,8 @@ export default function Sidebar({ counts }: SidebarProps) {
             className={`${styles.navItem} ${item.isActive ? styles.navItemActive : ''}`}
             aria-current={item.isActive ? 'page' : undefined}
             data-testid={`sidebar-nav-${item.testId}`}
+            onMouseEnter={() => handlePrefetchIntent(item.href)}
+            onFocus={() => handlePrefetchIntent(item.href)}
           >
             <div className={styles.navIcon}>{item.icon}</div>
             <span className={styles.navLabel}>{item.label}</span>

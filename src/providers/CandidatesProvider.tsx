@@ -1,6 +1,12 @@
 'use client';
 
-import { useState, useCallback, createContext, useContext } from 'react';
+import {
+  useState,
+  useCallback,
+  createContext,
+  useContext,
+  useMemo,
+} from 'react';
 import { CandidateCounts } from '@/domain/candidate/schemas';
 
 const EMPTY_COUNTS: CandidateCounts = {
@@ -17,27 +23,41 @@ interface CandidatesContextValue {
   requestRefresh: () => void;
 }
 
-const CandidatesContext = createContext<CandidatesContextValue>({
-  counts: EMPTY_COUNTS,
-  refreshToken: 0,
-  setCounts: () => {},
-  requestRefresh: () => {},
-});
+const CandidatesContext = createContext<CandidatesContextValue | null>(null);
 
 export function useCandidates() {
-  return useContext(CandidatesContext);
+  const context = useContext(CandidatesContext);
+
+  if (!context) {
+    throw new Error('useCandidates must be used within CandidatesProvider');
+  }
+
+  return context;
 }
 
-export default function CandidatesProvider({ children }: { children: React.ReactNode }) {
-  const [counts, setCounts] = useState<CandidateCounts>(EMPTY_COUNTS);
+interface CandidatesProviderProps {
+  children: React.ReactNode;
+  initialCounts?: CandidateCounts;
+}
+
+export default function CandidatesProvider({
+  children,
+  initialCounts = EMPTY_COUNTS,
+}: CandidatesProviderProps) {
+  const [counts, setCounts] = useState<CandidateCounts>(initialCounts);
   const [refreshToken, setRefreshToken] = useState(0);
 
   const requestRefresh = useCallback(() => {
     setRefreshToken(current => current + 1);
   }, []);
 
+  const value = useMemo(
+    () => ({ counts, refreshToken, setCounts, requestRefresh }),
+    [counts, refreshToken, requestRefresh],
+  );
+
   return (
-    <CandidatesContext.Provider value={{ counts, refreshToken, setCounts, requestRefresh }}>
+    <CandidatesContext.Provider value={value}>
       {children}
     </CandidatesContext.Provider>
   );

@@ -1,35 +1,15 @@
-'use client';
+import LiveSessionShell from '@/components/LiveSessionShell';
+import CandidatesProvider from '@/providers/CandidatesProvider';
+import { getServerCandidateCounts } from '@/app/live-session/server-data';
 
-import CandidatesProvider, { useCandidates } from '@/providers/CandidatesProvider';
-import Sidebar from '@/components/Sidebar';
-
-const shellStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: '240px 1fr',
-  minHeight: '100vh',
-};
-
-const mainStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: '100vh',
-};
-
-function LayoutInner({ children }: { children: React.ReactNode }) {
-  const { counts } = useCandidates();
-
-  return (
-    <div style={shellStyle}>
-      <Sidebar counts={counts} />
-      <div style={mainStyle}>{children}</div>
-    </div>
-  );
-}
+export const dynamic = 'force-dynamic';
 
 export default function LiveSessionLayout({ children }: { children: React.ReactNode }) {
+  const initialCounts = getServerCandidateCounts();
+
   return (
-    <CandidatesProvider>
-      <LayoutInner>{children}</LayoutInner>
+    <CandidatesProvider initialCounts={initialCounts}>
+      <LiveSessionShell>{children}</LiveSessionShell>
     </CandidatesProvider>
   );
 }

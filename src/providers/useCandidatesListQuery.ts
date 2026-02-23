@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  buildCandidateListQueryKey,
+  normalizeCandidateTags,
+} from '@/domain/candidate/lib/query-key';
 import { useCandidates } from '@/providers/CandidatesProvider';
 import {
   CandidateCounts,
@@ -16,6 +20,8 @@ interface UseCandidatesListQueryInput {
   activeTags: Set<string>;
   sort: CandidateListSort;
   searchDebounceMs?: number;
+  initialData?: CandidateListResponse;
+  initialQueryKey?: string;
 }
 
 interface UseCandidatesListQueryResult extends CandidateListResponse {
@@ -59,27 +65,61 @@ export function useCandidatesListQuery({
   activeTags,
   sort,
   searchDebounceMs = 250,
+  initialData,
+  initialQueryKey,
 }: UseCandidatesListQueryInput): UseCandidatesListQueryResult {
   const { refreshToken, setCounts } = useCandidates();
-  const [response, setResponse] = useState<CandidateListResponse>(EMPTY_RESPONSE);
+  const [response, setResponse] = useState<CandidateListResponse>(initialData ?? EMPTY_RESPONSE);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [isLoading, setIsLoading] = useState(!initialData);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(Boolean(initialData));
   const requestIdRef = useRef(0);
+  const shouldSkipInitialFetchRef = useRef(Boolean(initialData) && Boolean(initialQueryKey));
+  const hasSeededInitialCountsRef = useRef(false);
 
   const debouncedSearch = useDebouncedValue(search.trim(), searchDebounceMs);
   const normalizedTags = useMemo(
-    () => (
-      Array.from(activeTags)
-        .map(tag => tag.trim().toLowerCase())
-        .filter(Boolean)
-        .sort((a, b) => a.localeCompare(b))
-    ),
+    () => normalizeCandidateTags(activeTags),
     [activeTags],
   );
   const tagsKey = normalizedTags.join(',');
+  const queryKey = useMemo(
+    () => buildCandidateListQueryKey({
+      status,
+      search: debouncedSearch,
+      tags: normalizedTags,
+      sort,
+    }),
+    [debouncedSearch, normalizedTags, sort, status],
+  );
 
   useEffect(() => {
+    if (!initialData || hasSeededInitialCountsRef.current) {
+      return;
+    }
+
+    hasSeededInitialCountsRef.current = true;
+    setCounts(initialData.counts);
+  }, [initialData, setCounts]);
+
+  useEffect(() => {
+    const shouldSkipInitialFetch = (
+      shouldSkipInitialFetchRef.current
+      && refreshToken === 0
+      && typeof initialQueryKey === 'string'
+      && queryKey === initialQueryKey
+    );
+
+    if (shouldSkipInitialFetch) {
+      shouldSkipInitialFetchRef.current = false;
+      setIsLoading(false);
+      setHasLoadedOnce(true);
+      setError(null);
+      return;
+    }
+
+    shouldSkipInitialFetchRef.current = false;
+
     const controller = new AbortController();
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
@@ -156,7 +196,7 @@ export function useCandidatesListQuery({
     })();
 
     return () => controller.abort();
-  }, [debouncedSearch, refreshToken, setCounts, sort, status, tagsKey]);
+  }, [debouncedSearch, initialQueryKey, queryKey, refreshToken, setCounts, sort, status, tagsKey]);
 
   return {
     ...response,

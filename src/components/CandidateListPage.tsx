@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CandidateStatus } from '@/domain/candidate/schemas';
+import { CandidateListResponse, CandidateStatus } from '@/domain/candidate/schemas';
 import { useCandidatesListQuery } from '@/providers/useCandidatesListQuery';
 import MainHeader from '@/components/MainHeader';
 import FiltersBar, { SortOption } from '@/components/FiltersBar';
@@ -15,6 +15,8 @@ interface CandidateListPageProps {
   countSuffix: string;
   searchPlaceholder: string;
   emptyMessage: string;
+  initialData: CandidateListResponse;
+  initialQueryKey: string;
 }
 
 const listPanelStyle: React.CSSProperties = {
@@ -35,6 +37,8 @@ export default function CandidateListPage({
   countSuffix,
   searchPlaceholder,
   emptyMessage,
+  initialData,
+  initialQueryKey,
 }: CandidateListPageProps) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortOption>('newest');
@@ -52,6 +56,8 @@ export default function CandidateListPage({
     search,
     activeTags,
     sort,
+    initialData,
+    initialQueryKey,
   });
 
   return (
